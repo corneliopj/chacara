@@ -1,20 +1,60 @@
 <?php
+// public/index.php - Bootstrap e Roteamento Manual
 
-use Illuminate\Foundation\Application;
-use Illuminate\Http\Request;
+// Simulação de autoloading manual de classes
+function my_autoloader($class) {
+    $path = str_replace('\\', '/', $class);
+    // Assumindo que Controllers estão em App/Controllers e Models em App/Models
+    if (file_exists("App/{$path}.php")) {
+        require_once "App/{$path}.php";
+    } elseif (file_exists("{$path}.php")) {
+        require_once "{$path}.php";
+    }
+}
+spl_autoload_register('my_autoloader');
 
-define('LARAVEL_START', microtime(true));
-
-// Determine if the application is in maintenance mode...
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require $maintenance;
+// Função para renderizar Blade (simulação)
+function view($view_path, $data = []) {
+    // Transforma o array $data em variáveis locais
+    extract($data);
+    
+    // Simula a inclusão do layout e da view específica
+    $view_file = __DIR__ . "/../resources/views/{$view_path}.blade.php";
+    
+    if (file_exists($view_file)) {
+        ob_start();
+        include $view_file;
+        return ob_get_clean();
+    } else {
+        return "Erro: View '{$view_path}' não encontrada.";
+    }
 }
 
-// Register the Composer autoloader...
-require __DIR__.'/../vendor/autoload.php';
+// Inclusão das Rotas
+require_once __DIR__ . '/../routes/web.php';
 
-// Bootstrap Laravel and handle the request...
-/** @var Application $app */
-$app = require_once __DIR__.'/../bootstrap/app.php';
+// Roteador manual (muito simplificado)
+$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+$method = $_SERVER['REQUEST_METHOD'];
 
-$app->handleRequest(Request::capture());
+$route_found = false;
+foreach ($routes as $route) {
+    if ($route['method'] === $method && $route['uri'] === $uri) {
+        $controller_name = $route['controller'];
+        $action = $route['action'];
+
+        // Instancia o Controller e chama a Action
+        $controller_class = "App\\Controllers\\{$controller_name}";
+        if (class_exists($controller_class)) {
+            $controller = new $controller_class();
+            echo $controller->$action();
+            $route_found = true;
+            break;
+        }
+    }
+}
+
+if (!$route_found) {
+    http_response_code(404);
+    echo view('404'); // Simula uma view 404
+}
