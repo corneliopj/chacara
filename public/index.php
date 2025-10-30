@@ -18,15 +18,22 @@ function view($view_path, $data = []) {
     // Transforma o array $data em variáveis locais
     extract($data);
     
-    // Simula a inclusão do layout e da view específica
-    $view_file = __DIR__ . "/../resources/views/{$view_path}.blade.php";
+    // Define onde a view principal será encontrada para o layout usá-la.
+    $view_content_file = __DIR__ . "/../resources/views/{$view_path}.blade.php";
     
-    if (file_exists($view_file)) {
+    // Simula a inclusão do layout principal
+    $layout_file = __DIR__ . "/../resources/views/layout/master.blade.php";
+
+    if (file_exists($view_content_file) && file_exists($layout_file)) {
         ob_start();
-        include $view_file;
+        
+        // Incluímos o layout, que por sua vez, deve incluir $view_content_file
+        include $layout_file; 
+        
         return ob_get_clean();
     } else {
-        return "Erro: View '{$view_path}' não encontrada.";
+        // Lógica simplificada de erro para views não encontradas
+        return "Erro: View '{$view_path}' ou Layout 'master' não encontrada.";
     }
 }
 
