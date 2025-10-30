@@ -1,0 +1,14 @@
+#ANTIGO
+#RewriteEngine On
+#RewriteBase / 
+#RewriteCond %{REQUEST_URI} !^/public/ 
+#RewriteRule ^(.*)$ /public/$1 [L,NC]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Se a URL começar com /log, não reescreva e pare o processamento
+    RewriteRule ^log(/.*)?$ log/$1 [L]
+
+    # Para todas as outras URLs, redirecione para /public
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
