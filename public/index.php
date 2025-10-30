@@ -15,11 +15,15 @@ spl_autoload_register('my_autoloader');
 
 // Função para renderizar Blade (simulação)
 function view($view_path, $data = []) {
-    // Transforma o array $data em variáveis locais
-    extract($data);
-    
-    // Define onde a view principal será encontrada para o layout usá-la.
+    // Define o caminho completo do arquivo de conteúdo (a view específica)
     $view_content_file = __DIR__ . "/../resources/views/{$view_path}.blade.php";
+    
+    // Injeta o caminho do arquivo de conteúdo no array de dados,
+    // garantindo que ele esteja disponível para o layout via 'extract'.
+    $data['view_content_file'] = $view_content_file; 
+    
+    // Transforma o array $data em variáveis locais (incluindo $view_content_file)
+    extract($data); 
     
     // Simula a inclusão do layout principal
     $layout_file = __DIR__ . "/../resources/views/layout/master.blade.php";
@@ -27,7 +31,7 @@ function view($view_path, $data = []) {
     if (file_exists($view_content_file) && file_exists($layout_file)) {
         ob_start();
         
-        // Incluímos o layout, que por sua vez, deve incluir $view_content_file
+        // Incluímos o layout
         include $layout_file; 
         
         return ob_get_clean();
