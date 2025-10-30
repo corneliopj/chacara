@@ -32,7 +32,12 @@
         </div>
     </div>
     <div class="container">
-        <?php include $view_file; // Simulação de Inclusão da View Filha ?>
+      <?php 
+            // Verifica se a variável que contém o caminho existe e se o arquivo existe
+            if (isset($view_content_file) && file_exists($view_content_file)) {
+                include $view_content_file; 
+            }
+        ?>
     </div>
 </body>
 </html>
