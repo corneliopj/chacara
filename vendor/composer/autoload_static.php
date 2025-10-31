@@ -534,6 +534,15 @@ class ComposerStaticInitc514d8f7b9fc5970bdd94287905ef584
 
     public static $classMap = array (
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\DashboardController' => __DIR__ . '/../..' . '/app/Http/Controllers/DashboardController.php',
+        'App\\Http\\Controllers\\DespesaController' => __DIR__ . '/../..' . '/app/Http/Controllers/DespesaController.php',
+        'App\\Http\\Controllers\\RelatoriosController' => __DIR__ . '/../..' . '/app/Http/Controllers/RelatoriosController.php',
+        'App\\Models\\Cultura' => __DIR__ . '/../..' . '/app/Models/Cultura.php',
+        'App\\Models\\Despesa' => __DIR__ . '/../..' . '/app/Models/Despesa.php',
+        'App\\Models\\Inventario' => __DIR__ . '/../..' . '/app/Models/Inventario.php',
+        'App\\Models\\Model' => __DIR__ . '/../..' . '/app/Models/Model.php',
+        'App\\Models\\Receita' => __DIR__ . '/../..' . '/app/Models/Receita.php',
+        'App\\Models\\Tarefa' => __DIR__ . '/../..' . '/app/Models/Tarefa.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',

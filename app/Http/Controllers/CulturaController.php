@@ -1,4 +1,4 @@
-<?php namespace App\Controllers;
+<?php namespace App\Http\Controllers;
 
 use App\Models\Cultura;
 
