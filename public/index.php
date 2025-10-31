@@ -1,71 +1,32 @@
 <?php
-// public/index.php - Bootstrap e Roteamento Manual
 
-// Simulação de autoloading manual de classes
-function my_autoloader($class) {
-    $path = str_replace('\\', '/', $class);
-    // Assumindo que Controllers estão em App/Controllers e Models em App/Models
-    if (file_exists("App/{$path}.php")) {
-        require_once "App/{$path}.php";
-    } elseif (file_exists("{$path}.php")) {
-        require_once "{$path}.php";
-    }
-}
-spl_autoload_register('my_autoloader');
+/**
+ * Laravel - A PHP Framework For Web Artisans
+ *
+ * @package  Laravel
+ * @author   Taylor Otwell <taylor@laravel.com>
+ */
 
-// Função para renderizar Blade (simulação)
-function view($view_path, $data = []) {
-    // Define o caminho completo do arquivo de conteúdo (a view específica)
-    $view_content_file = __DIR__ . "/../resources/views/{$view_path}.blade.php";
-    
-    // Injeta o caminho do arquivo de conteúdo no array de dados,
-    // garantindo que ele esteja disponível para o layout via 'extract'.
-    $data['view_content_file'] = $view_content_file; 
-    
-    // Transforma o array $data em variáveis locais (incluindo $view_content_file)
-    extract($data); 
-    
-    // Simula a inclusão do layout principal
-    $layout_file = __DIR__ . "/../resources/views/layout/master.blade.php";
+define('LARAVEL_START', microtime(true));
 
-    if (file_exists($view_content_file) && file_exists($layout_file)) {
-        ob_start();
-        
-        // Incluímos o layout
-        include $layout_file; 
-        
-        return ob_get_clean();
-    } else {
-        // Lógica simplificada de erro para views não encontradas
-        return "Erro: View '{$view_path}' ou Layout 'master' não encontrada.";
-    }
+// Tenta localizar o autoloader do Composer (corrigindo problemas com subdiretórios)
+$autoloader = __DIR__.'/../vendor/autoload.php';
+
+if (! file_exists($autoloader)) {
+    die('O autoloader do Composer não foi encontrado. Execute "composer install".');
 }
 
-// Inclusão das Rotas
-require_once __DIR__ . '/../routes/web.php';
+require $autoloader;
 
-// Roteador manual (muito simplificado)
-$uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-$method = $_SERVER['REQUEST_METHOD'];
+// Obtém o Application Container (o coração do Laravel)
+$app = require_once __DIR__.'/../bootstrap/app.php';
 
-$route_found = false;
-foreach ($routes as $route) {
-    if ($route['method'] === $method && $route['uri'] === $uri) {
-        $controller_name = $route['controller'];
-        $action = $route['action'];
+// Cria a instância do Kernel HTTP
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-        // Instancia o Controller e chama a Action
-        $controller_class = "App\\Controllers\\{$controller_name}";
-        if (class_exists($controller_class)) {
-            $controller = new $controller_class();
-            echo $controller->$action();
-            $route_found = true;
-            break;
-        }
-    }
-}
+// Trata a requisição (lê o routes/web.php, inicializa facades, etc.)
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+)->send();
 
-if (!$route_found) {
-    http_response_code(404);
-    echo view('404'); // Simula uma view 404
-}
+$kernel->terminate($request, $response);
