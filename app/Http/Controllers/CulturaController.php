@@ -1,6 +1,7 @@
 <?php namespace App\Http\Controllers;
 
 use App\Models\Cultura;
+use Illuminate\Http\Request;
 
 class CulturaController {
     
