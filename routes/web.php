@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CulturaController;
 use App\Http\Controllers\DespesaController;
-use App\Http\Controllers\ReceitaController;
 use App\Http\Controllers\TarefaController;
 
 /*
@@ -40,15 +39,7 @@ Route::resource('despesas', DespesaController::class)->names([
 ]);
 
 // --- CRUD DE RECEITAS ---
-Route::resource('receitas', ReceitaController::class)->names([
-    'index' => 'receitas.index',
-    'create' => 'receitas.create',
-    'store' => 'receitas.store',
-    'show' => 'receitas.show',
-    'edit' => 'receitas.edit',
-    'update' => 'receitas.update',
-    'destroy' => 'receitas.destroy',
-]);
+
 
 // --- CRUD DE TAREFAS (MANEJOS) ---
 Route::resource('tarefas', TarefaController::class)->names([
