@@ -1,36 +1,27 @@
 <?php
-// routes/web.php - Definição das Rotas
 
-// Formato: ['method' => 'GET/POST', 'uri' => 'caminho', 'controller' => 'NomeController', 'action' => 'metodo']
-$routes = [
-    // Dashboard e API
-    ['method' => 'GET', 'uri' => '', 'controller' => 'DashboardController', 'action' => 'index'],
-    ['method' => 'GET', 'uri' => 'dashboard', 'controller' => 'DashboardController', 'action' => 'index'],
-    ['method' => 'GET', 'uri' => 'api/graficos', 'controller' => 'DashboardController', 'action' => 'apiGraficos'],
-    
-    // Culturas CRUD
-    ['method' => 'GET', 'uri' => 'culturas', 'controller' => 'CulturaController', 'action' => 'index'],
-    ['method' => 'GET', 'uri' => 'culturas/criar', 'controller' => 'CulturaController', 'action' => 'criar'],
-    ['method' => 'POST', 'uri' => 'culturas', 'controller' => 'CulturaController', 'action' => 'salvar'],
-    // ... (rotas de edição/atualização/deleção omitidas por brevidade, mas devem seguir o padrão)
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DespesaController;
+use App\Http\Controllers\ReceitaController;
+use App\Http\Controllers\CulturaController;
+use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\TarefaController;
+use App\Http\Controllers\RelatoriosController;
 
-    // Despesas CRUD
-    ['method' => 'GET', 'uri' => 'despesas', 'controller' => 'DespesaController', 'action' => 'index'],
-    ['method' => 'POST', 'uri' => 'despesas', 'controller' => 'DespesaController', 'action' => 'salvar'],
+// Rota Principal
+Route::redirect('/', '/dashboard');
 
-    // Receitas CRUD
-    ['method' => 'GET', 'uri' => 'receitas', 'controller' => 'ReceitaController', 'action' => 'index'],
-    ['method' => 'POST', 'uri' => 'receitas', 'controller' => 'ReceitaController', 'action' => 'salvar'],
-    
-    // Inventário CRUD
-    ['method' => 'GET', 'uri' => 'inventario', 'controller' => 'InventarioController', 'action' => 'index'],
-    ['method' => 'POST', 'uri' => 'inventario', 'controller' => 'InventarioController', 'action' => 'salvar'],
+// Dashboard e API
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/api/graficos', [DashboardController::class, 'apiGraficos'])->name('api.graficos');
 
-    // Tarefas CRUD
-    ['method' => 'GET', 'uri' => 'tarefas', 'controller' => 'TarefaController', 'action' => 'index'],
-    ['method' => 'POST', 'uri' => 'tarefas', 'controller' => 'TarefaController', 'action' => 'salvar'],
+// CRUDs
+Route::resource('culturas', CulturaController::class);
+Route::resource('despesas', DespesaController::class);
+Route::resource('receitas', ReceitaController::class);
+Route::resource('inventario', InventarioController::class);
+Route::resource('tarefas', TarefaController::class); // Tarefas: CRUD
 
-    // Relatórios
-    ['method' => 'GET', 'uri' => 'relatorios', 'controller' => 'RelatoriosController', 'action' => 'index'],
-    ['method' => 'POST', 'uri' => 'relatorios', 'controller' => 'RelatoriosController', 'action' => 'gerar'],
-];
+// Relatórios (POST para envio de filtros)
+Route::match(['get', 'post'], '/relatorios', [RelatoriosController::class, 'index'])->name('relatorios.index');

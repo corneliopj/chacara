@@ -1,32 +1,32 @@
 <?php namespace App\Models;
 
-class Receita extends Model {
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
+
+class Receita extends Model
+{
     protected $table = 'receitas';
     protected $fillable = ['valor', 'data', 'descricao', 'fonte', 'cultura_id', 'item_id'];
 
-    public function save() {
-        $pdo = $this->connect();
-        $pdo->beginTransaction();
-
-        try {
-            // 1. Salva a receita
-            $result = parent::save();
-            
-            // 2. Regra: Se Receita for 'producao', soma receitas_acumuladas na Cultura
-            if ($result && $this->fonte === 'producao' && $this->cultura_id) {
-                $sql = "UPDATE culturas SET receitas_acumuladas = receitas_acumuladas + :valor WHERE id = :cultura_id";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute(['valor' => $this->valor, 'cultura_id' => $this->cultura_id]);
+    public function cultura(): BelongsTo
+    {
+        return $this->belongsTo(Cultura::class, 'cultura_id');
+    }
+    
+    public function itemInventario(): BelongsTo
+    {
+        return $this->belongsTo(Inventario::class, 'item_id');
+    }
+    
+    // Regra: Atualiza receitas_acumuladas da cultura após salvar
+    protected static function booted(): void
+    {
+        static::created(function (Receita $receita) {
+            // Regra: Se Receita for 'producao', soma receitas_acumuladas cultura
+            if ($receita->fonte === 'producao' && $receita->cultura_id) {
+                DB::table('culturas')->where('id', $receita->cultura_id)->increment('receitas_acumuladas', $receita->valor);
             }
-            
-            $pdo->commit();
-            return $result;
-
-        } catch (\Exception $e) {
-            $pdo->rollBack();
-            // Em ambiente real, logar o erro
-            // echo "Erro ao salvar receita: " . $e->getMessage();
-            return false;
-        }
+        });
     }
 }

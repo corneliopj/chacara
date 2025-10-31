@@ -1,48 +1,36 @@
-<?php namespace App\Controllers;
+<?php namespace App\Http\Controllers;
 
 use App\Models\Despesa;
+use Illuminate\Http\Request;
 
-class DespesaController {
+class DespesaController extends Controller
+{
+    // ... (index, edit, update, destroy - padrão CRUD)
 
-    public function index() {
-        $despesas = Despesa::all();
-        return view('despesas.index', ['despesas' => $despesas]);
-    }
-
-    public function salvar() {
-        // Simulação de Request POST do Laravel
-        $data = $_POST; 
-        
-        // 1. Cria a Despesa (tipo 'cultura' ou 'geral')
-        $despesa = new Despesa([
-            'valor' => $data['valor'],
-            'data' => $data['data'],
-            'descricao' => $data['descricao'],
-            'tipo' => $data['tipo'],
-            'cultura_id' => $data['cultura_id'] ?? null,
+    public function store(Request $request)
+    {
+        $dados = $request->validate([
+            'valor' => 'required|numeric|min:0.01',
+            'data' => 'required|date',
+            'descricao' => 'required|string|max:255',
+            'tipo' => 'required|in:cultura,geral',
+            'cultura_id' => 'nullable|exists:culturas,id',
         ]);
 
-        if ($despesa->save()) {
-            // 2. Regra: Se tipo 'cultura', replica em despesa 'geral'
-            if ($data['tipo'] === 'cultura' && $data['cultura_id']) {
-                $despesa_geral = new Despesa([
-                    'valor' => $data['valor'],
-                    'data' => $data['data'],
-                    'descricao' => 'Custo de Cultura (Geral): ' . $data['descricao'],
-                    'tipo' => 'geral',
-                    'cultura_id' => null, // Esta é a cópia geral
-                ]);
-                $despesa_geral->save(); 
-                // A atualização de gastos_acumulados na Cultura é feita no Model Despesa::save() da despesa original.
-            }
-            // Redireciona de volta para a lista (simulação)
-            header('Location: /despesas');
-            exit;
-        } 
+        // 1. Cria a Despesa original. O Model Despesa cuida de somar gastos_acumulados.
+        $despesa = Despesa::create($dados);
         
-        // Erro
-        return view('despesas.criar', ['erro' => 'Falha ao salvar despesa.']);
+        // 2. Regra: Se tipo 'cultura', replica em despesa 'geral'
+        if ($despesa->tipo === 'cultura' && $despesa->cultura_id) {
+            Despesa::create([
+                'valor' => $despesa->valor,
+                'data' => $despesa->data,
+                'descricao' => "Custo de Cultura (Geral - Ref: {$despesa->id}): {$despesa->descricao}",
+                'tipo' => 'geral',
+                'cultura_id' => null, // Esta é a cópia geral
+            ]);
+        }
+        
+        return redirect()->route('despesas.index')->with('sucesso', 'Despesa registrada com sucesso!');
     }
-    
-    // ... (criar, editar, deletar)
 }
