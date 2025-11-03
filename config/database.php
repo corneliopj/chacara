@@ -85,7 +85,7 @@ return [
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'petersen_chacara'),
             'username' => env('DB_USERNAME', 'petersen_chacara'),
-            'password' => env('DB_PASSWORD', 'nsq8%F5un2sJyTc#'),
+            'password' => env('DB_PASSWORD', '@@@vqFOB98y7p'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
