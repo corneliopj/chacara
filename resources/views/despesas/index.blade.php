@@ -35,7 +35,7 @@
                             <td>{{ $despesa->cultura->nome ?? 'Geral' }}</td>
                             <td>{{ $despesa->descricao }}</td>
                             <td>{{ $despesa->categoria }}</td>
-                            <td>{{ $despesa->data_lancamento->format('d/m/Y') }}</td>
+                            <td>{{ $despesa->data->format('d/m/Y') }}</td>
                             <td class="text-red-600 font-bold">R$ {{ number_format($despesa->valor, 2, ',', '.') }}</td>
                             <td class="action-buttons">
                                 <a href="{{ route('despesas.edit', $despesa) }}" class="btn-icon bg-blue-500">✏️</a>

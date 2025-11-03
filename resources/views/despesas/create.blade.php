@@ -41,12 +41,12 @@
         </div>
 
         {{-- Campo Data --}}
-        <div class="form-group">
-            <label for="data_lancamento">Data do Lançamento:</label>
-            <input type="date" id="data_lancamento" name="data_lancamento" required 
-                value="{{ old('data_lancamento', date('Y-m-d')) }}">
-            @error('data_lancamento') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
+<div class="form-group">
+    <label for="data">Data do Lançamento:</label>
+    <input type="date" id="data" name="data" required 
+        value="{{ old('data', date('Y-m-d')) }}"> {{-- <-- CORRIGIDO (usando 'data') --}}
+    @error('data') <span class="error-message">{{ $message }}</span> @enderror
+</div>
 
         {{-- Campo Categoria --}}
         <div class="form-group">
