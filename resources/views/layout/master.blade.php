@@ -7,7 +7,7 @@
     <title>Chácara Gestão | @yield('title', 'Dashboard')</title>
     
     {{-- CRÍTICO: ATIVAR O VITE AQUI --}}
-    @vite(['public/build/assets/app-CcvqGqZI.css', 'public/build/assets/app-CvgioS1y.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     @stack('styles')
 </head>
