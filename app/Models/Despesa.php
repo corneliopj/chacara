@@ -13,12 +13,12 @@ class Despesa extends Model
         'cultura_id',
         'descricao',
         'valor',
-        'data_lancamento',
+        'data',
         'categoria',
     ];
 
     protected $casts = [
-        'data_lancamento' => 'date',
+        'data' => 'date',
         'valor' => 'float',
     ];
 
