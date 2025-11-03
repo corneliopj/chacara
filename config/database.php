@@ -70,7 +70,7 @@ return [
             'port' => env('DB_PORT', '3305'),
             'database' => env('DB_DATABASE', 'chacara_sittingtoo'),
             'username' => env('DB_USERNAME', 'chacara_sittingtoo'),
-            'password' => env('DB_PASSWORD', '3f4ef2582c7b4ca925d3f9d098558b48934d9555'),
+            'password' => env('DB_PASSWORD', '@@vqFOB98y7p'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
