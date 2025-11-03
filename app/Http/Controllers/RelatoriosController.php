@@ -4,55 +4,45 @@ use App\Models\Cultura;
 use App\Models\Despesa;
 use App\Models\Receita;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
-class RelatoriosController extends Controller
+class RelatorioController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Exibe o relatório de Balanço Financeiro por Cultura.
+     */
+    public function financeiroPorCultura()
     {
-        $culturas = Cultura::all(['id', 'nome', 'area']);
-        $filtros = $request->all();
-        $resultados = null;
+        $culturas = Cultura::with(['receitas', 'despesas'])->get();
+        
+        $balanco = $culturas->map(function ($cultura) {
+            $totalReceitas = $cultura->receitas->sum('valor');
+            $totalDespesas = $cultura->despesas->sum('valor');
+            $lucroLiquido = $totalReceitas - $totalDespesas;
 
-        if ($request->isMethod('POST')) {
-            $request->validate([
-                'data_inicio' => 'required|date',
-                'data_fim' => 'required|date|after_or_equal:data_inicio',
-                'cultura_id' => 'nullable|exists:culturas,id',
-            ]);
-
-            $cultura_id = $filtros['cultura_id'] ?? null;
-            
-            // Query base para o período
-            $query_despesas = Despesa::whereBetween('data', [$filtros['data_inicio'], $filtros['data_fim']]);
-            $query_receitas = Receita::whereBetween('data', [$filtros['data_inicio'], $filtros['data_fim']]);
-            
-            // Aplica filtro de cultura se houver
-            if ($cultura_id) {
-                $query_despesas->where('cultura_id', $cultura_id);
-                $query_receitas->where('cultura_id', $cultura_id);
-            }
-            
-            $total_despesas = $query_despesas->sum('valor');
-            $total_receitas = $query_receitas->sum('valor');
-            $lucro = $total_receitas - $total_despesas;
-            
-            $resultados = [
-                'total_despesas' => $total_despesas,
-                'total_receitas' => $total_receitas,
-                'lucro' => $lucro,
+            return [
+                'nome' => $cultura->nome,
+                'area_ha' => $cultura->area_ha,
+                'data_plantio' => $cultura->data_plantio->format('d/m/Y'),
+                'total_receitas' => $totalReceitas,
+                'total_despesas' => $totalDespesas,
+                'lucro_liquido' => $lucroLiquido,
             ];
-            
-            // Cálculo Custo por Hectare
-            if ($cultura_id) {
-                $cultura = Cultura::find($cultura_id);
-                if ($cultura && $cultura->area > 0) {
-                    $resultados['custo_ha'] = $total_despesas / $cultura->area;
-                    $resultados['cultura_nome'] = $cultura->nome;
-                    $resultados['area'] = $cultura->area;
-                }
-            }
-        }
+        });
 
-        return view('relatorios.index', compact('culturas', 'resultados', 'filtros'));
+        // Adiciona um balanço para lançamentos "Gerais" (sem cultura_id)
+        $receitasGerais = Receita::whereNull('cultura_id')->sum('valor');
+        $despesasGerais = Despesa::whereNull('cultura_id')->sum('valor');
+        
+        $balancoGeral = [
+            'nome' => 'Geral (Sem Associação)',
+            'area_ha' => '-',
+            'data_plantio' => '-',
+            'total_receitas' => $receitasGerais,
+            'total_despesas' => $despesasGerais,
+            'lucro_liquido' => $receitasGerais - $despesasGerais,
+        ];
+
+        return view('relatorios.financeiro_cultura', compact('balanco', 'balancoGeral'));
     }
 }

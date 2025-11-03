@@ -6,7 +6,28 @@ use Illuminate\Http\Request;
 class DespesaController extends Controller
 {
     // ... (index, edit, update, destroy - padrão CRUD)
-
+    // Trecho do DespesaController@index
+public function index()
+{
+    $despesas = Despesa::with('cultura')->orderBy('data_lancamento', 'desc')->get();
+    return view('despesas.index', compact('despesas'));
+}
+// Trecho do DespesaController@create
+public function create()
+{
+    // Obtém um array associativo (id => nome) das culturas ativas
+    $culturas = Cultura::orderBy('nome')->pluck('nome', 'id');
+    
+    return view('despesas.create', compact('culturas'));
+}
+// Trecho do DespesaController@edit
+public function edit(Despesa $despesa)
+{
+    // Obtém a lista de culturas para a seleção
+    $culturas = Cultura::orderBy('nome')->pluck('nome', 'id');
+    
+    return view('despesas.edit', compact('despesa', 'culturas'));
+}
     public function store(Request $request)
     {
         $dados = $request->validate([
