@@ -62,8 +62,14 @@ return [
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
+#DB_HOST="localhost"
+#DB_PORT="3306"
+#DB_DATABASE="petersen_chacara"
+#DB_USERNAME="petersen_chacara"
+#DB_PASSWORD="nsq8%F5un2sJyTc#"
 
-        'mariadb' => [
+/** 
+ 'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '0nexee.h.filess.io'),
@@ -71,6 +77,15 @@ return [
             'database' => env('DB_DATABASE', 'chacara_sittingtoo'),
             'username' => env('DB_USERNAME', 'chacara_sittingtoo'),
             'password' => env('DB_PASSWORD', '@@vqFOB98y7p'),
+*/
+        'mariadb' => [
+            'driver' => 'mariadb',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', 'localhost'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'petersen_chacara'),
+            'username' => env('DB_USERNAME', 'petersen_chacara'),
+            'password' => env('DB_PASSWORD', 'nsq8%F5un2sJyTc#'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
