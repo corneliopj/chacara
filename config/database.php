@@ -81,7 +81,7 @@ return [
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', 'localhost'),
+            'host' => env('DB_HOST', '65.19.154.94'),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'petersen_chacara'),
             'username' => env('DB_USERNAME', 'petersen_chacara'),
