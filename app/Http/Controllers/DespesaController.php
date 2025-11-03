@@ -9,7 +9,7 @@ class DespesaController extends Controller
     // Trecho do DespesaController@index
 public function index()
 {
-    $despesas = Despesa::with('cultura')->orderBy('data_lancamento', 'desc')->get();
+    $despesas = Despesa::with('cultura')->orderBy('data', 'desc')->get();
     return view('despesas.index', compact('despesas'));
 }
 // Trecho do DespesaController@create
