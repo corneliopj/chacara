@@ -14,17 +14,9 @@
     {{-- AdminLTE CSS via CDN --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     
-    {{-- CSS CUSTOMIZADO (Tailwind/Bootstrap - OPCIONAL) --}}
-    {{-- Se você tiver algum arquivo CSS customizado em public/css/app.css: --}}
-    {{-- <link rel="stylesheet" href="{{ asset('css/app.css') }}"> --}}
-    
     {{-- Estilos personalizados para sobrescrever ou complementar --}}
     <style>
-        .brand-link.bg-success {
-            /* Força a cor verde escura no logo */
-            background-color: #007bff !important; /* Exemplo de um azul mais corporativo */
-            color: white;
-        }
+        /* Ajustes de cor para manter o tema verde, alinhado ao Bootstrap/AdminLTE */
         .bg-success { 
             background-color: #28a745 !important; /* Verde Bootstrap */
         }
@@ -43,6 +35,11 @@
             margin-bottom: 1.5rem;
             border-bottom: 1px solid #dee2e6;
             padding-bottom: 0.5rem;
+        }
+        
+        /* Estilos de Card AdminLTE para formulários */
+        .card-body .form-group label {
+            font-weight: 600;
         }
     </style>
     
@@ -81,7 +78,11 @@
                     
                     @php 
                         $currentRoute = Route::currentRouteName();
-                        $isActive = fn($route) => $currentRoute === $route ? 'active' : '';
+                        
+                        // CORREÇÃO DE SINTAXE: Usando a sintaxe function() use ($currentRoute) para compatibilidade PHP
+                        $isActive = function($route) use ($currentRoute) {
+                            return $currentRoute === $route ? 'active' : '';
+                        };
                     @endphp
 
                     {{-- Dashboard --}}
@@ -149,6 +150,7 @@
                 <div class="row mb-2">
                     <div class="col-sm-6">
                         {{-- O título da página é renderizado aqui --}}
+                        {{-- Usando o @yield('title') da View filha se 'title_page' não for definido --}}
                         <h1 class="m-0 text-dark">@yield('title_page', @yield('title', 'Dashboard'))</h1>
                     </div>
                 </div>
