@@ -1,6 +1,20 @@
 {
+  "node_modules/admin-lte/dist/css/adminlte.min.css": {
+    "file": "assets/adminlte-BckCYrBu.css",
+    "src": "node_modules/admin-lte/dist/css/adminlte.min.css",
+    "isEntry": true,
+    "names": [
+      "adminlte.css"
+    ]
+  },
+  "node_modules/admin-lte/dist/js/adminlte.min.js?commonjs-entry": {
+    "file": "assets/adminlte.min-BHl1FNx7.js",
+    "name": "adminlte.min",
+    "src": "node_modules/admin-lte/dist/js/adminlte.min.js?commonjs-entry",
+    "isEntry": true
+  },
   "resources/css/app.css": {
-    "file": "assets/app-CcvqGqZI.css",
+    "file": "assets/app-BPWzf21J.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [

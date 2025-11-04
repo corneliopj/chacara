@@ -1,118 +1,154 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Chácara Gestão | @yield('title', 'Dashboard')</title>
-    
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
-    {{-- APLICANDO ESTILOS ADMINLTE (Baseado em Tailwind) --}}
-    <style>
-        /* TONS DE CORES: Sidebar Escura, Destaque Verde/Azul */
-        :root {
-            --sidebar-bg: #2d3748; /* slate-800 */
-            --color-primary: #10b981; /* green-500 */
-        }
-        
-        /* Estilos Globais para Card e Sombra */
-        .card-container { @apply bg-white shadow-xl rounded-lg p-6; } /* Estilo principal do AdminLTE */
-        
-        /* Botões */
-        .btn-primary { @apply px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-150 shadow-md; }
-        .btn-secondary { @apply px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-150; }
-        .btn-icon { @apply p-1 rounded-sm text-white inline-flex items-center justify-center h-7 w-7 text-xs font-semibold shadow-sm; }
 
-        /* Estilos de Formulário */
-        .form-group { @apply mb-4; }
-        .form-group label { @apply block text-sm font-medium text-gray-700 mb-1; }
-        .form-group input, .form-group select, .form-group textarea { @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 p-2 border; }
-        .alert-success { @apply p-3 mb-4 text-sm text-green-700 bg-green-100 border border-green-300 rounded-md; }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
 
-        /* Estilos de Tabela (Mais compactos, estilo AdminLTE) */
-        .table-responsive table { @apply w-full border-collapse; }
-        .table-responsive th { @apply px-4 py-2 text-left text-xs font-bold text-gray-600 uppercase tracking-wider bg-gray-100 border-b border-gray-200; }
-        .table-responsive td { @apply px-4 py-2 text-sm text-gray-700 border-b border-gray-100; }
-        .table-responsive tr:hover { @apply bg-green-50/50; } 
-        
-        .content h2 { @apply text-2xl font-semibold text-gray-800 mb-6; }
-        
-        /* Estilo da Sidebar Ativa */
-        .sidebar-active { @apply bg-green-500 text-white font-bold shadow-md; }
-        .sidebar-item:hover { @apply bg-slate-700; }
-    </style>
+    @vite([
+        'resources/css/app.css', // Se ainda usa
+        'node_modules/admin-lte/dist/css/adminlte.min.css'
+    ])
     @stack('styles')
 </head>
-<body class="bg-gray-100 flex flex-col min-h-screen">
+
+{{-- Classe 'sidebar-mini' é necessária para o layout compacto --}}
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+    {{-- 1. NAVBAR SUPERIOR (AdminLTE Padrão) --}}
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <span class="nav-link">Bem-vindo(a), Cornelio</span>
+            </li>
+            {{-- Adicione Logout ou outras opções aqui --}}
+        </ul>
+    </nav>
     
-    {{-- 1. NAVBAR SUPERIOR (Clara e Simples) --}}
-    <header class="bg-white shadow-md p-3 flex items-center justify-between sticky top-0 z-20 border-b border-gray-200">
-        <div class="text-xl font-bold text-gray-800 flex items-center">
-             <span class="mr-2 text-2xl text-green-500">🌿</span> Chácara Gestão
-        </div>
-        <nav class="flex space-x-4 text-sm text-gray-600">
-            <span class="font-medium text-gray-700">Usuário: Cornelio</span>
-        </nav>
-    </header>
+    {{-- 2. MENU LATERAL PRINCIPAL (Sidebar) --}}
+    <aside class="main-sidebar sidebar-dark-success elevation-4">
+        {{-- Logo (Verde Chácara) --}}
+        <a href="{{ route('dashboard') }}" class="brand-link bg-success">
+            <span class="brand-text font-weight-light">🌿 Chácara Gestão</span>
+        </a>
 
-    {{-- 2. CONTEÚDO PRINCIPAL --}}
-    <div class="flex flex-grow">
-        
-        {{-- 2a. MENU LATERAL ESQUERDO (Sidebar - Cinza Escuro Sólido) --}}
-        <aside class="w-60 bg-slate-800 text-white flex-shrink-0 shadow-2xl h-full sticky top-0">
-            <nav class="p-3 space-y-1 text-sm">
-                
-                <div class="font-semibold text-gray-400 uppercase text-xs pt-3 pb-1">NAVEGAÇÃO</div>
-                
-                @php 
-                    $currentRoute = Route::currentRouteName();
-                    $isActive = fn($route) => $currentRoute === $route ? 'sidebar-active' : 'hover:bg-slate-700';
-                @endphp
+        <div class="sidebar">
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                    
+                    {{-- Helper para o item ativo AdminLTE --}}
+                    @php 
+                        $currentRoute = Route::currentRouteName();
+                        $isActive = fn($route) => $currentRoute === $route ? 'active' : '';
+                        $isMenuOpen = fn($routes) => in_array($currentRoute, $routes) ? 'menu-is-opening menu-open' : '';
+                    @endphp
 
-                <a href="{{ route('dashboard') }}" class="sidebar-item flex items-center p-2 rounded-sm transition duration-150 {{ $isActive('dashboard') }}">
-                    <span class="mr-3 text-base">📊</span> Dashboard
-                </a>
+                    {{-- Dashboard --}}
+                    <li class="nav-item">
+                        <a href="{{ route('dashboard') }}" class="nav-link {{ $isActive('dashboard') }}">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
 
-                <div class="font-semibold text-gray-400 uppercase text-xs pt-4 pb-1 border-b border-slate-700">MÓDULOS DE DADOS</div>
-                
-                <a href="{{ route('culturas.index') }}" class="sidebar-item flex items-center p-2 rounded-sm transition duration-150 {{ $isActive('culturas.index') }}">
-                    <span class="mr-3 text-base">🌱</span> Culturas
-                </a>
-                
-                <a href="{{ route('despesas.index') }}" class="sidebar-item flex items-center p-2 rounded-sm transition duration-150 {{ $isActive('despesas.index') }}">
-                    <span class="mr-3 text-base">💸</span> Despesas
-                </a>
-                
-                <a href="{{ route('receitas.index') }}" class="sidebar-item flex items-center p-2 rounded-sm transition duration-150 {{ $isActive('receitas.index') }}">
-                    <span class="mr-3 text-base">💰</span> Receitas
-                </a>
-                
-                <a href="{{ route('tarefas.index') }}" class="sidebar-item flex items-center p-2 rounded-sm transition duration-150 {{ $isActive('tarefas.index') }}">
-                    <span class="mr-3 text-base">📋</span> Tarefas
-                </a>
+                    <li class="nav-header">GESTÃO DE DADOS</li>
 
-                <div class="font-semibold text-gray-400 uppercase text-xs pt-4 pb-1 border-b border-slate-700">ANÁLISE</div>
+                    {{-- Culturas --}}
+                    <li class="nav-item">
+                        <a href="{{ route('culturas.index') }}" class="nav-link {{ $isActive('culturas.index') }}">
+                            <i class="nav-icon fas fa-seedling"></i>
+                            <p>Culturas</p>
+                        </a>
+                    </li>
 
-                <a href="{{ route('relatorios.financeiro_cultura') }}" class="sidebar-item flex items-center p-2 rounded-sm transition duration-150 {{ $isActive('relatorios.financeiro_cultura') }}">
-                    <span class="mr-3 text-base">📈</span> Balanço/Cultura
-                </a>
+                    {{-- Despesas --}}
+                    <li class="nav-item">
+                        <a href="{{ route('despesas.index') }}" class="nav-link {{ $isActive('despesas.index') }}">
+                            <i class="nav-icon fas fa-money-bill-wave-alt"></i>
+                            <p>Despesas</p>
+                        </a>
+                    </li>
+
+                    {{-- Receitas --}}
+                    <li class="nav-item">
+                        <a href="{{ route('receitas.index') }}" class="nav-link {{ $isActive('receitas.index') }}">
+                            <i class="nav-icon fas fa-hand-holding-usd"></i>
+                            <p>Receitas</p>
+                        </a>
+                    </li>
+
+                    {{-- Tarefas --}}
+                    <li class="nav-item">
+                        <a href="{{ route('tarefas.index') }}" class="nav-link {{ $isActive('tarefas.index') }}">
+                            <i class="nav-icon fas fa-tasks"></i>
+                            <p>Tarefas</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-header">RELATÓRIOS</li>
+
+                    {{-- Balanço/Cultura --}}
+                    <li class="nav-item">
+                        <a href="{{ route('relatorios.financeiro_cultura') }}" class="nav-link {{ $isActive('relatorios.financeiro_cultura') }}">
+                            <i class="nav-icon fas fa-chart-line"></i>
+                            <p>Balanço/Cultura</p>
+                        </a>
+                    </li>
+                    
+                </ul>
             </nav>
-        </aside>
+        </div>
+    </aside>
 
-        {{-- 2b. PAINEL PRINCIPAL (Content Area) --}}
-        <main class="flex-grow p-5">
-            {{-- Aplica a classe de Card do AdminLTE --}}
-            <div class="content card-container"> 
-                @yield('content') 
+    {{-- 3. CONTEÚDO PRINCIPAL --}}
+    <div class="content-wrapper">
+        {{-- Header da página com Breadcrumbs (Opcional, mas recomendado pelo AdminLTE) --}}
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0 text-dark">@yield('title_page', 'Dashboard')</h1>
+                    </div>
+                </div>
             </div>
-        </main>
-    </div>
+        </div>
 
-    {{-- 3. RODAPÉ --}}
-    <footer class="bg-white text-center p-3 text-gray-500 text-sm border-t mt-auto">
-        <strong class="text-gray-700">Chácara Gestão</strong> &copy; {{ date('Y') }}
-    </footer>
+        {{-- O CONTEÚDO DA VIEW FILHA É INJETADO AQUI --}}
+        <div class="content">
+            <div class="container-fluid">
+                @yield('content')
+            </div>
+        </div>
+    </div>
     
-    @stack('scripts')
+    {{-- 4. RODAPÉ --}}
+    <footer class="main-footer">
+        <div class="float-right d-none d-sm-inline">
+            Chácara Gestão
+        </div>
+        <strong>Copyright &copy; {{ date('Y') }}</strong>
+    </footer>
+
+</div>
+{{-- Fim do Wrapper --}}
+
+{{-- Scripts --}}
+{{-- AdminLTE precisa de jQuery e Bootstrap primeiro --}}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+@vite(['node_modules/admin-lte/dist/js/adminlte.min.js'])
+
+@stack('scripts')
 </body>
 </html>
