@@ -5,14 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Chácara Gestão | @yield('title', 'Dashboard')</title>
 
+    {{-- Google Font: Source Sans Pro (AdminLTE) --}}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    
+    {{-- Font Awesome (Ícones - AdminLTE Requer) --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-
-    @vite([
-        'resources/css/app.css', // Se ainda usa
-        'node_modules/admin-lte/dist/css/adminlte.min.css'
-    ])
+    {{-- AdminLTE CSS via CDN --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    
+    {{-- CSS CUSTOMIZADO (Tailwind/Bootstrap - OPCIONAL) --}}
+    {{-- Se você tiver algum arquivo CSS customizado em public/css/app.css: --}}
+    {{-- <link rel="stylesheet" href="{{ asset('css/app.css') }}"> --}}
+    
+    {{-- Estilos personalizados para sobrescrever ou complementar --}}
+    <style>
+        .brand-link.bg-success {
+            /* Força a cor verde escura no logo */
+            background-color: #007bff !important; /* Exemplo de um azul mais corporativo */
+            color: white;
+        }
+        .bg-success { 
+            background-color: #28a745 !important; /* Verde Bootstrap */
+        }
+        .btn-primary { 
+            background-color: #28a745 !important; 
+            border-color: #28a745 !important;
+        }
+        .btn-primary:hover {
+            background-color: #218838 !important;
+            border-color: #1e7e34 !important;
+        }
+        /* Ajuste do Título Principal */
+        .content h2 { 
+            font-size: 1.5rem; 
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.5rem;
+        }
+    </style>
+    
     @stack('styles')
 </head>
 
@@ -20,7 +53,7 @@
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 
-    {{-- 1. NAVBAR SUPERIOR (AdminLTE Padrão) --}}
+    {{-- 1. NAVBAR SUPERIOR --}}
     <nav class="main-header navbar navbar-expand navbar-white navbar-light">
         <ul class="navbar-nav">
             <li class="nav-item">
@@ -31,14 +64,14 @@
             <li class="nav-item">
                 <span class="nav-link">Bem-vindo(a), Cornelio</span>
             </li>
-            {{-- Adicione Logout ou outras opções aqui --}}
         </ul>
     </nav>
     
     {{-- 2. MENU LATERAL PRINCIPAL (Sidebar) --}}
-    <aside class="main-sidebar sidebar-dark-success elevation-4">
-        {{-- Logo (Verde Chácara) --}}
-        <a href="{{ route('dashboard') }}" class="brand-link bg-success">
+    {{-- Usando a classe sidebar-dark-primary para o esquema de cores padrão do AdminLTE --}}
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        {{-- Logo --}}
+        <a href="{{ route('dashboard') }}" class="brand-link">
             <span class="brand-text font-weight-light">🌿 Chácara Gestão</span>
         </a>
 
@@ -46,11 +79,9 @@
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                     
-                    {{-- Helper para o item ativo AdminLTE --}}
                     @php 
                         $currentRoute = Route::currentRouteName();
                         $isActive = fn($route) => $currentRoute === $route ? 'active' : '';
-                        $isMenuOpen = fn($routes) => in_array($currentRoute, $routes) ? 'menu-is-opening menu-open' : '';
                     @endphp
 
                     {{-- Dashboard --}}
@@ -95,7 +126,7 @@
                         </a>
                     </li>
 
-                    <li class="nav-header">RELATÓRIOS</li>
+                    <li class="nav-header">ANÁLISE</li>
 
                     {{-- Balanço/Cultura --}}
                     <li class="nav-item">
@@ -112,12 +143,13 @@
 
     {{-- 3. CONTEÚDO PRINCIPAL --}}
     <div class="content-wrapper">
-        {{-- Header da página com Breadcrumbs (Opcional, mas recomendado pelo AdminLTE) --}}
+        {{-- Header da página com Breadcrumbs (AdminLTE padrão) --}}
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1 class="m-0 text-dark">@yield('title_page', 'Dashboard')</h1>
+                        {{-- O título da página é renderizado aqui --}}
+                        <h1 class="m-0 text-dark">@yield('title_page', @yield('title', 'Dashboard'))</h1>
                     </div>
                 </div>
             </div>
@@ -134,7 +166,7 @@
     {{-- 4. RODAPÉ --}}
     <footer class="main-footer">
         <div class="float-right d-none d-sm-inline">
-            Chácara Gestão
+            Sistema de Gestão Agrícola
         </div>
         <strong>Copyright &copy; {{ date('Y') }}</strong>
     </footer>
@@ -142,12 +174,10 @@
 </div>
 {{-- Fim do Wrapper --}}
 
-{{-- Scripts --}}
-{{-- AdminLTE precisa de jQuery e Bootstrap primeiro --}}
+{{-- SCRIPTS (AdminLTE Requer JQuery e Bootstrap) --}}
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-
-@vite(['node_modules/admin-lte/dist/js/adminlte.min.js'])
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
 
 @stack('scripts')
 </body>
