@@ -38,6 +38,7 @@ Route::resource('despesas', DespesaController::class)->names([
     'edit' => 'despesas.edit',
     'update' => 'despesas.update',
     'destroy' => 'despesas.destroy',
+    'storeMultiCultura'=>'despesas.storeMultiCultura', // Rota para armazenar despesas múltiplas
 ]);
 
 // --- CRUD DE RECEITAS --- // <-- NOVO BLOCO

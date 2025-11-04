@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Despesa;
 use App\Models\Cultura;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB; // <--- CORREÇÃO: Necessário para transações
 
 class DespesaController extends Controller
 {
@@ -25,7 +26,7 @@ class DespesaController extends Controller
      */
     public function create()
     {
-        // Lista de culturas para o campo de seleção
+        // Lista de culturas para o campo de seleção (pode ser opcional)
         $culturas = Cultura::orderBy('nome')->get(['id', 'nome']);
         
         // Categorias predefinidas para facilitar o controle
@@ -37,7 +38,7 @@ class DespesaController extends Controller
     }
 
     /**
-     * Armazena uma nova despesa no banco de dados.
+     * Armazena uma nova despesa no banco de dados (Para formulários simples/gerais).
      */
     public function store(Request $request)
     {
@@ -45,8 +46,8 @@ class DespesaController extends Controller
             'descricao' => 'required|string|max:255',
             'valor' => 'required|numeric|min:0.01',
             'data' => 'required|date',
-            'categoria' => 'required|string|max:100', // Campo Categoria agora é obrigatório
-            'cultura_id' => 'nullable|exists:culturas,id', // Pode ser NULL para despesa geral
+            'categoria' => 'required|string|max:100',
+            'cultura_id' => 'nullable|exists:culturas,id',
             'observacoes' => 'nullable|string',
         ], [
             'required' => 'O campo :attribute é obrigatório.',
@@ -62,5 +63,99 @@ class DespesaController extends Controller
                          ->with('success', 'Despesa registrada com sucesso!');
     }
 
-    // ... (Métodos show, edit, update, destroy seriam adicionados aqui)
+    /**
+     * Armazena MÚLTIPLAS despesas em uma única transação (vindo do 'carrinho' da Cultura).
+     */
+    public function storeMultiCultura(Request $request)
+    {
+        $request->validate([
+            'cultura_id' => 'required|exists:culturas,id',
+            'data_base' => 'required|date',
+            'itens' => 'required|array|min:1',
+            'itens.*.categoria' => 'required|string|max:100',
+            'itens.*.descricao' => 'required|string|max:255',
+            'itens.*.valor' => 'required|numeric|min:0.01',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $culturaId = $request->cultura_id;
+            $dataBase = $request->data_base;
+            
+            foreach ($request->itens as $item) {
+                Despesa::create([
+                    'cultura_id' => $culturaId,
+                    'data' => $dataBase,
+                    'categoria' => $item['categoria'],
+                    'descricao' => $item['descricao'],
+                    'valor' => $item['valor'],
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('culturas.edit', $culturaId)
+                             ->with('success', 'As despesas foram registradas na cultura com sucesso!');
+        
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Em caso de erro, redireciona de volta com uma mensagem
+            return redirect()->back()
+                             ->withInput()
+                             ->withErrors(['erro_bd' => 'Não foi possível salvar as despesas: ' . $e->getMessage()]);
+        }
+    }
+    
+    /**
+     * Exibe uma despesa específica (Opcional).
+     */
+    public function show(Despesa $despesa)
+    {
+        return view('despesas.show', compact('despesa'));
+    }
+
+    /**
+     * Exibe o formulário de edição de uma despesa.
+     */
+    public function edit(Despesa $despesa)
+    {
+        $culturas = Cultura::orderBy('nome')->get(['id', 'nome']);
+        $categorias = [
+            'Insumo', 'Semente', 'Mão-de-Obra', 'Combustível', 'Eletricidade', 'Equipamento', 'Manutenção', 'Outro Geral'
+        ];
+        
+        return view('despesas.edit', compact('despesa', 'culturas', 'categorias'));
+    }
+
+    /**
+     * Atualiza a despesa no banco de dados.
+     */
+    public function update(Request $request, Despesa $despesa)
+    {
+        $request->validate([
+            'descricao' => 'required|string|max:255',
+            'valor' => 'required|numeric|min:0.01',
+            'data' => 'required|date',
+            'categoria' => 'required|string|max:100',
+            'cultura_id' => 'nullable|exists:culturas,id',
+            'observacoes' => 'nullable|string',
+        ]);
+
+        $despesa->update($request->all());
+
+        return redirect()->route('despesas.index')
+                         ->with('success', 'Despesa atualizada com sucesso!');
+    }
+
+    /**
+     * Remove uma despesa do banco de dados.
+     */
+    public function destroy(Despesa $despesa)
+    {
+        $despesa->delete();
+
+        return redirect()->route('despesas.index')
+                         ->with('success', 'Despesa removida com sucesso!');
+    }
 }

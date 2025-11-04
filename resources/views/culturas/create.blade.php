@@ -19,18 +19,18 @@
                     {{-- 1. Nome da Cultura --}}
                     <div class="form-group">
                         <label for="nome">Nome da Cultura</label>
-                        <input type="text" class="form-control @error('nome') is-invalid @enderror" id="nome" name="nome" value="{{ old('nome') }}" placeholder="Ex: Milho, Soja, Mandioca" required>
+                        <input type="text" class="form-control @error('nome') is-invalid @enderror" id="nome" name="nome" value="{{ old('nome') }}" placeholder="Ex: Milho, Soja, Arroz" required>
                         @error('nome')
                             <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                         @enderror
                     </div>
                     
                     <div class="row">
-                        {{-- 2. Área (em hectares) --}}
+                        {{-- 2. Área (em metros quadrados) --}}
                         <div class="form-group col-md-4">
-                            <label for="area">Área (em hectares - ha)</label>
-                            <input type="number" step="0.01" class="form-control @error('area') is-invalid @enderror" id="area" name="area" value="{{ old('area') }}" placeholder="Ex: 5.5" required>
-                            @error('area')
+                            <label for="area_m2">Área (em m²)</label>
+                            <input type="number" step="0.01" class="form-control @error('area_m2') is-invalid @enderror" id="area_m2" name="area_m2" value="{{ old('area_m2') }}" placeholder="Ex: 5500" required>
+                            @error('area_m2')
                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                             @enderror
                         </div>
@@ -50,7 +50,7 @@
                             <input type="date" class="form-control @error('colheita_prevista') is-invalid @enderror" id="colheita_prevista" name="colheita_prevista" value="{{ old('colheita_prevista') }}">
                             @error('colheita_prevista')
                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                            @enderror
+                            </input>
                         </div>
                     </div>
 
@@ -69,7 +69,7 @@
                             @enderror
                         </div>
 
-                        {{-- 6. Estoque Mínimo (Referente ao Inventário) --}}
+                        {{-- 6. Estoque Mínimo --}}
                         <div class="form-group col-md-4">
                             <label for="estoque_minimo">Estoque Mínimo (Unidades)</label>
                             <input type="number" class="form-control @error('estoque_minimo') is-invalid @enderror" id="estoque_minimo" name="estoque_minimo" value="{{ old('estoque_minimo', 0) }}" min="0">
@@ -82,7 +82,7 @@
 
                     {{-- 7. Observações --}}
                     <div class="form-group">
-                        <label for="observacoes">Observações (Solo, Cultivar, etc.)</label>
+                        <label for="observacoes">Observações</label>
                         <textarea class="form-control @error('observacoes') is-invalid @enderror" id="observacoes" name="observacoes" rows="3">{{ old('observacoes') }}</textarea>
                         @error('observacoes')
                             <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
