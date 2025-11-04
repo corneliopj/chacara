@@ -1,4 +1,6 @@
-<?php namespace App\Models;
+<?php
+
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,19 +16,16 @@ class Despesa extends Model
         'descricao',
         'valor',
         'data',
-        'categoria',
-    ];
-
-    protected $casts = [
-        'data' => 'date',
-        'valor' => 'float',
+        'categoria', // Adicionado para classificar (Semente, Insumo, Mão-de-Obra, Geral, etc.)
+        'observacoes',
     ];
 
     /**
-     * Relacionamento com a Cultura (Opcional)
+     * Define o relacionamento com a Cultura (belongsTo).
+     * Uma despesa pode pertencer a uma cultura ou ser geral (cultura_id = null).
      */
     public function cultura()
     {
-        return $this->belongsTo(Cultura::class, 'cultura_id');
+        return $this->belongsTo(Cultura::class);
     }
 }

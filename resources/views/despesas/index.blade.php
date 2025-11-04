@@ -1,56 +1,105 @@
 @extends('layout.master')
 
-@section('title', 'Registro de Despesas')
+@section('title', 'Despesas Registradas')
+@section('title_page', 'Gestão de Despesas')
 
 @section('content')
-<div class="content">
-    <div class="flex justify-between items-center mb-6">
-        <h2>💸 Despesas Registradas</h2>
-        <a href="{{ route('despesas.create') }}" class="btn-primary">➕ Nova Despesa</a>
-    </div>
 
-    @if (session('sucesso'))
-        <div class="alert alert-success">{{ session('sucesso') }}</div>
-    @endif
-    
-    @if ($despesas->isEmpty())
-        <p class="text-gray-500">Nenhuma despesa registrada ainda. Comece a lançar seus custos operacionais.</p>
-    @else
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Cultura</th>
-                        <th>Descrição</th>
-                        <th>Categoria</th>
-                        <th>Data</th>
-                        <th>Valor (R$)</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($despesas as $despesa)
-                        <tr class="border-b hover:bg-red-50/50">
-                            {{-- Assume que o relacionamento 'cultura' foi carregado com ->with('cultura') no Controller --}}
-                            <td>{{ $despesa->cultura->nome ?? 'Geral' }}</td>
-                            <td>{{ $despesa->descricao }}</td>
-                            <td>{{ $despesa->categoria }}</td>
-                            <td>{{ $despesa->data->format('d/m/Y') }}</td>
-                            <td class="text-red-600 font-bold">R$ {{ number_format($despesa->valor, 2, ',', '.') }}</td>
-                            <td class="action-buttons">
-                                <a href="{{ route('despesas.edit', $despesa) }}" class="btn-icon bg-blue-500">✏️</a>
-                                
-                                <form action="{{ route('despesas.destroy', $despesa) }}" method="POST" onsubmit="return confirm('Confirmar a exclusão desta despesa?');" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-icon bg-red-500">🗑️</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+<div class="row">
+    <div class="col-12">
+        <div class="card card-danger card-outline">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-money-bill-wave-alt mr-1"></i> Despesas Registradas
+                </h3>
+                
+                <div class="card-tools">
+                    <a href="{{ route('despesas.create') }}" class="btn btn-sm btn-danger">
+                        <i class="fas fa-plus mr-1"></i> Nova Despesa
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                
+                {{-- Mensagem de Sucesso (após salvar ou editar) --}}
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
+                @if($despesas->isEmpty())
+                    <div class="alert alert-info m-3">
+                        Nenhuma despesa registrada ainda. Use o botão **Nova Despesa** para começar.
+                    </div>
+                @else
+                    <table class="table table-striped table-valign-middle">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cultura</th>
+                                <th>Categoria</th>
+                                <th>Descrição</th>
+                                <th>Valor (R$)</th>
+                                <th style="width: 150px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($despesas as $despesa)
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($despesa->data)->format('d/m/Y') }}</td>
+                                    <td>
+                                        {{-- Exibe o nome da cultura ou 'Geral' se não estiver vinculada --}}
+                                        <span class="badge {{ $despesa->cultura_id ? 'badge-primary' : 'badge-secondary' }}">
+                                            {{ $despesa->cultura->nome ?? 'Geral' }} 
+                                        </span>
+                                    </td>
+                                    <td>{{ $despesa->categoria }}</td>
+                                    <td>{{ Str::limit($despesa->descricao, 50) }}</td> {{-- Limita a descrição para caber na tela --}}
+                                    <td>
+                                        <span class="text-danger font-weight-bold">
+                                            R$ {{ number_format($despesa->valor, 2, ',', '.') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{-- Botão Editar --}}
+                                        <a href="{{ route('despesas.edit', $despesa->id) }}" class="btn btn-xs btn-info" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
+                                        {{-- Botão Excluir (Usando formulário para método DELETE) --}}
+                                        <form action="{{ route('despesas.destroy', $despesa->id) }}" method="POST" style="display: inline-block;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-xs btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta despesa?')" title="Excluir">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+            
+            {{-- Rodapé do Card com Paginação --}}
+            @if($despesas->lastPage() > 1)
+                <div class="card-footer clearfix">
+                    {{ $despesas->links('vendor.pagination.bootstrap-4') }}
+                </div>
+            @endif
         </div>
-    @endif
+    </div>
 </div>
+
 @endsection
+
+{{-- Adiciona o uso do Carbon e String Helper --}}
+@php
+use Illuminate\Support\Str;
+@endphp
