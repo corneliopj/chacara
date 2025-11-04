@@ -1,4 +1,5 @@
-// vite.config.js (Exemplo de como deve ficar)
+// vite.config.js
+
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 
@@ -6,12 +7,12 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/css/app.css', // Seu CSS customizado ou Tailwind
+                'resources/css/app.css', 
                 'resources/js/app.js',
-                // Incluindo AdminLTE e suas dependências
+                // CAMINHOS DO ADMINLTE:
                 'node_modules/admin-lte/dist/css/adminlte.min.css',
-                'node_modules/admin-lte/dist/js/adminlte.min.js',
-                // E os ícones Font Awesome (geralmente usado pelo AdminLTE)
+                'node_modules/admin-lte/dist/js/adminlte.min.js', // <--- Verifique esta linha
+                // Outros caminhos, como FontAwesome, se necessário
             ],
             refresh: true,
         }),
