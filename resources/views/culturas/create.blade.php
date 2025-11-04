@@ -1,58 +1,81 @@
 @extends('layout.master')
 
 @section('title', 'Nova Cultura')
+@section('title_page', 'Cadastro de Cultura')
 
 @section('content')
-<div class="content">
-    <h2>➕ Registrar Nova Cultura</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        {{-- Card AdminLTE com cor primária (azul escuro/padrão) --}}
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Registrar Nova Cultura</h3>
+            </div>
+            
+            {{-- Início do Formulário --}}
+            {{-- O action aponta para o método store do CulturaController --}}
+            <form action="{{ route('culturas.store') }}" method="POST">
+                @csrf
+                <div class="card-body">
+                    
+                    {{-- 1. Nome da Cultura --}}
+                    <div class="form-group">
+                        <label for="nome">Nome da Cultura</label>
+                        <input type="text" 
+                               class="form-control @error('nome') is-invalid @enderror" 
+                               id="nome" 
+                               name="nome" 
+                               value="{{ old('nome') }}" 
+                               placeholder="Ex: Milho, Soja, Arroz" 
+                               required>
+                        @error('nome')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+                    
+                    {{-- 2. Estoque Mínimo (Referente ao Inventário) --}}
+                    <div class="form-group">
+                        <label for="estoque_minimo">Estoque Mínimo (Unidades)</label>
+                        <input type="number" 
+                               class="form-control @error('estoque_minimo') is-invalid @enderror" 
+                               id="estoque_minimo" 
+                               name="estoque_minimo" 
+                               value="{{ old('estoque_minimo', 0) }}" 
+                               placeholder="Ex: 100" 
+                               min="0">
+                        <small class="form-text text-muted">Aviso de estoque será gerado se a quantidade cair abaixo deste valor.</small>
+                        @error('estoque_minimo')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+
+                    {{-- 3. Data de Plantio --}}
+                    {{-- Campos de datas e observações foram removidos do Controller inicial para simplificar. 
+                         Se precisar deles, atualizaremos o Modelo e o Controller. Por enquanto, focaremos nos campos essenciais: nome e estoque. --}}
+                    
+                </div>
+                
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i> Salvar Cultura
+                    </button>
+                    <a href="{{ route('culturas.index') }}" class="btn btn-secondary ml-2">
+                        <i class="fas fa-times-circle mr-1"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+            {{-- Fim do Formulário --}}
+
+        </div>
+    </div>
     
-    <form action="{{ route('culturas.store') }}" method="POST">
-        @csrf
-        
-        <div class="form-group">
-            <label for="nome">Nome da Cultura:</label>
-            <input type="text" id="nome" name="nome" required value="{{ old('nome') }}">
-            @error('nome') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
-        
-        <div class="form-group">
-            <label for="area_ha">Área (em hectares - ha):</label>
-            <input type="number" id="area_ha" name="area_ha" step="0.01" required value="{{ old('area_ha') }}">
-            @error('area_ha') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="form-group">
-            <label for="data_plantio">Data de Plantio:</label>
-            <input type="date" id="data_plantio" name="data_plantio" required value="{{ old('data_plantio', date('Y-m-d')) }}">
-            @error('data_plantio') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="form-group">
-            <label for="data_colheita_prevista">Colheita Prevista (Opcional):</label>
-            <input type="date" id="data_colheita_prevista" name="data_colheita_prevista" value="{{ old('data_colheita_prevista') }}">
-            @error('data_colheita_prevista') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
-        
-        <div class="form-group">
-            <label for="status">Status Inicial:</label>
-            <select id="status" name="status" required>
-                <option value="Ativa" {{ old('status') == 'Ativa' ? 'selected' : '' }}>Ativa</option>
-                <option value="Inativa" {{ old('status') == 'Inativa' ? 'selected' : '' }}>Inativa</option>
-                <option value="Colheita" {{ old('status') == 'Colheita' ? 'selected' : '' }}>Em Colheita</option>
-            </select>
-            @error('status') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="form-group">
-            <label for="observacoes">Observações (Solo, Cultivar, etc.):</label>
-            <textarea id="observacoes" name="observacoes">{{ old('observacoes') }}</textarea>
-            @error('observacoes') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="flex justify-start gap-4 mt-6">
-            <button type="submit" class="btn-primary">Salvar Cultura</button>
-            <a href="{{ route('culturas.index') }}" class="btn-secondary">Cancelar</a>
-        </div>
-    </form>
+    {{-- Coluna vazia para alinhar o card --}}
+    <div class="col-md-4"></div>
 </div>
+
 @endsection
