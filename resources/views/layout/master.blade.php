@@ -148,8 +148,8 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        {{-- CORREÇÃO: Removendo chaves duplas ({{ }}) para evitar ParseError na vírgula. --}}
-                        <h1 class="m-0 text-dark">@yield('title_page', @yield('title', 'Dashboard'))</h1>
+                        {{-- CORREÇÃO FINAL: Usando yieldContent e coalescência para evitar o ParseError --}}
+                        <h1 class="m-0 text-dark">{{ $__env->yieldContent('title_page') ?: ($__env->yieldContent('title') ?: 'Dashboard') }}</h1>
                     </div>
                 </div>
             </div>
