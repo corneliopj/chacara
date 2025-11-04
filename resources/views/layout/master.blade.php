@@ -78,7 +78,7 @@
                     @php 
                         $currentRoute = Route::currentRouteName();
                         
-                        // Sintaxe de função anônima tradicional (compatível com todas as versões)
+                        // Usando função anônima tradicional para compatibilidade e evitar erro de Parse
                         $isActive = function($route) use ($currentRoute) {
                             return $currentRoute === $route ? 'active' : '';
                         };
@@ -148,7 +148,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        {{-- CORREÇÃO: Removendo chaves duplas. A diretiva @yield já faz o echo. --}}
+                        {{-- CORREÇÃO: Removendo chaves duplas ({{ }}) para evitar ParseError na vírgula. --}}
                         <h1 class="m-0 text-dark">@yield('title_page', @yield('title', 'Dashboard'))</h1>
                     </div>
                 </div>
