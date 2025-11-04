@@ -1,74 +1,51 @@
-<?php namespace App\Http\Controllers;
+<?php
+
+namespace App\Http\Controllers;
 
 use App\Models\Cultura;
-use App\Models\Despesa;
-use App\Models\Receita;
-use App\Models\Inventario;
-use App\Models\Tarefa;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Models\Inventario; // Assumindo que você tem um modelo Inventario
+use App\Models\Receita; // Para dados do dashboard
+use App\Models\Despesa; // Para dados do dashboard
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB; // Necessário para a subconsulta
 
 class DashboardController extends Controller
 {
+    /**
+     * Exibe a página principal do Dashboard.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
-        $culturas = Cultura::all();
-        $total_gastos = Despesa::sum('valor');
-        $total_receitas = Receita::sum('valor');
-        $total_lucro = $total_receitas - $total_gastos;
-
-        // Alertas de Estoque e Colheita (Usando Join/Where do Eloquent/Query Builder)
-        $alertas_estoque = Inventario::whereColumn('quantidade', '<', function ($query) {
+        // 1. Cálculo de Alerta de Estoque (CORRIGIDO AQUI)
+        // Usamos where('coluna', operador, subconsulta) para subconsultas escalares.
+        $alertas_estoque = Inventario::where('quantidade', '<', function ($query) {
             $query->select('estoque_minimo')
                   ->from('culturas')
-                  ->whereRaw('culturas.nome = inventario.item')
+                  ->whereRaw('culturas.nome = inventarios.item') // Ajuste o nome da tabela se necessário (singular/plural)
                   ->limit(1);
         })->get(['item', 'quantidade', 'valor_unitario']);
-        
-        $data_alerta = Carbon::now()->addDays(7);
-        $alertas_colheita = Cultura::whereBetween('data_colheita_prevista', [Carbon::now(), $data_alerta])->get(['nome', 'data_colheita_prevista']);
-        
-        $tarefas_pendentes = Tarefa::where('status', 'pendente')
-            ->with('cultura:id,nome') // Carrega o nome da cultura
-            ->orderBy('data_prevista')
+
+        // 2. Cálculo do Balanço Financeiro (Exemplo)
+        $total_receitas = Receita::sum('valor');
+        $total_despesas = Despesa::sum('valor');
+        $balanco_geral = $total_receitas - $total_despesas;
+
+        // 3. Culturas com maior despesa (Exemplo de agregação)
+        $culturas_mais_caras = Despesa::select('cultura_id', DB::raw('SUM(valor) as total_despesa'))
+            ->groupBy('cultura_id')
+            ->orderByDesc('total_despesa')
+            ->with('cultura')
             ->limit(5)
             ->get();
 
-        return view('dashboard', compact(
-            'total_gastos', 'total_receitas', 'total_lucro', 'culturas',
-            'alertas_estoque', 'alertas_colheita', 'tarefas_pendentes'
-        ));
-    }
-    
-    public function apiGraficos()
-    {
-        // Gráfico 1: Despesas vs Receitas Mensais
-        $mensal = DB::table('despesas')
-            ->select(
-                DB::raw('DATE_FORMAT(data, "%Y-%m") as mes'),
-                DB::raw('SUM(valor) as total_despesas'),
-                DB::raw('0 as total_receitas')
-            )
-            ->unionAll(
-                DB::table('receitas')
-                ->select(
-                    DB::raw('DATE_FORMAT(data, "%Y-%m") as mes'),
-                    DB::raw('0 as total_despesas'),
-                    DB::raw('SUM(valor) as total_receitas')
-                )
-            )
-            ->groupBy('mes')
-            ->orderBy('mes')
-            ->get();
-
-        // Gráfico 2: Lucro por Cultura (apenas Culturas com movimentação)
-        $lucro_cultura = Cultura::select('nome', DB::raw('(receitas_acumuladas - gastos_acumulados) as lucro'))
-            ->where(DB::raw('receitas_acumuladas + gastos_acumulados'), '>', 0)
-            ->get();
-
-        return response()->json([
-            'mensal' => $mensal,
-            'lucro_cultura' => $lucro_cultura,
+        return view('dashboard.index', [
+            'alertas_estoque' => $alertas_estoque,
+            'total_receitas' => $total_receitas,
+            'total_despesas' => $total_despesas,
+            'balanco_geral' => $balanco_geral,
+            'culturas_mais_caras' => $culturas_mais_caras,
         ]);
     }
 }
