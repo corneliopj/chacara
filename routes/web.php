@@ -1,12 +1,12 @@
-<?php namespace App\Http\Controllers;
+<?php 
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CulturaController;
 use App\Http\Controllers\DespesaController;
-use App\Http\Controllers\ReceitaController; // <-- ADICIONE ESTE
-use App\Http\Controllers\TarefaController; // <-- ADICIONE ESTE
-use App\Http\Controllers\DashboardController; // <-- ADICIONE ESTE (se não estiver lá)
-use App\Http\Controllers\RelatorioController; // <-- ADICIONE ESTE (se não estiver lá)
+use App\Http\Controllers\ReceitaController;
+use App\Http\Controllers\TarefaController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RelatorioController;
 
 
 /*
@@ -16,7 +16,7 @@ use App\Http\Controllers\RelatorioController; // <-- ADICIONE ESTE (se não esti
 */
 
 // Rota principal (Agora aponta para o Dashboard)
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard'); // Alterado para ir diretamente ao Dashboard
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
 // --- CRUD DE CULTURAS ---
 Route::resource('culturas', CulturaController::class)->names([
@@ -38,10 +38,13 @@ Route::resource('despesas', DespesaController::class)->names([
     'edit' => 'despesas.edit',
     'update' => 'despesas.update',
     'destroy' => 'despesas.destroy',
-    'storeMultiCultura'=>'despesas.storeMultiCultura', // Rota para armazenar despesas múltiplas
 ]);
 
-// --- CRUD DE RECEITAS --- // <-- NOVO BLOCO
+// ⚠️ CORREÇÃO: Rota customizada para salvar múltiplas despesas (Carrinho)
+Route::post('despesas/store-multi-cultura', [DespesaController::class, 'storeMultiCultura'])->name('despesas.store_multi_cultura');
+
+
+// --- CRUD DE RECEITAS ---
 Route::resource('receitas', ReceitaController::class)->names([
     'index' => 'receitas.index',
     'create' => 'receitas.create',
@@ -52,7 +55,7 @@ Route::resource('receitas', ReceitaController::class)->names([
     'destroy' => 'receitas.destroy',
 ]);
 
-// --- CRUD DE TAREFAS --- // <-- NOVO BLOCO
+// --- CRUD DE TAREFAS ---
 Route::resource('tarefas', TarefaController::class)->names([
     'index' => 'tarefas.index',
     'create' => 'tarefas.create',
@@ -63,5 +66,5 @@ Route::resource('tarefas', TarefaController::class)->names([
     'destroy' => 'tarefas.destroy',
 ]);
 
-// --- ROTAS DE RELATÓRIOS --- // <-- NOVO BLOCO
+// --- ROTAS DE RELATÓRIOS ---
 Route::get('relatorios/financeiro-cultura', [RelatorioController::class, 'financeiroPorCultura'])->name('relatorios.financeiro_cultura');
