@@ -148,7 +148,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        {{-- O título da página é renderizado aqui --}}
+                        {{-- CORREÇÃO: Removendo chaves duplas. A diretiva @yield já faz o echo. --}}
                         <h1 class="m-0 text-dark">@yield('title_page', @yield('title', 'Dashboard'))</h1>
                     </div>
                 </div>
