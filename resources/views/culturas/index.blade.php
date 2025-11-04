@@ -1,71 +1,107 @@
 @extends('layout.master')
 
 @section('title', 'Gestão de Culturas')
+@section('title_page', 'Culturas Registradas')
 
 @section('content')
-<div class="content">
-    <div class="flex justify-between items-center mb-6">
-        <h2>🌱 Culturas Registradas</h2>
-        <a href="{{ route('culturas.create') }}" class="btn-primary">➕ Nova Cultura</a>
-    </div>
 
-    @if (session('sucesso'))
-        <div class="alert alert-success">{{ session('sucesso') }}</div>
-    @endif
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-seedling mr-1"></i> Culturas Registradas
+                </h3>
+                
+                <div class="card-tools">
+                    <a href="{{ route('culturas.create') }}" class="btn btn-sm btn-success">
+                        <i class="fas fa-plus mr-1"></i> Nova Cultura
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                
+                {{-- Mensagem de Sucesso (após salvar ou editar) --}}
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
 
-    @if ($culturas->isEmpty())
-        <p class="text-gray-500">Nenhuma cultura registrada ainda. Comece a planejar seu plantio!</p>
-    @else
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Área (ha)</th>
-                        <th>Plantio</th>
-                        <th>Colheita Prevista</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($culturas as $cultura)
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="font-semibold">{{ $cultura->nome }}</td>
-                            <td>{{ number_format($cultura->area_ha, 2, ',', '.') }}</td>
-                            <td>{{ $cultura->data_plantio->format('d/m/Y') }}</td>
-                            <td>{{ $cultura->data_colheita_prevista ? $cultura->data_colheita_prevista->format('d/m/Y') : '-' }}</td>
-                            <td>
-                                <span class="status-badge status-{{ strtolower($cultura->status) }}">
-                                    {{ $cultura->status }}
-                                </span>
-                            </td>
-                            <td class="action-buttons">
-                                <a href="{{ route('culturas.edit', $cultura) }}" class="btn-icon bg-blue-500">✏️</a>
-                                <form action="{{ route('culturas.destroy', $cultura) }}" method="POST" onsubmit="return confirm('Confirmar a exclusão da cultura {{ $cultura->nome }}? Todas as despesas e receitas associadas serão removidas!');" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-icon bg-red-500">🗑️</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                @if($culturas->isEmpty())
+                    <div class="alert alert-info m-3">
+                        Nenhuma cultura registrada ainda. Comece a planejar seu plantio!
+                    </div>
+                @else
+                    <table class="table table-striped table-valign-middle">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Área (ha)</th>
+                                <th>Plantio</th>
+                                <th>Colheita Prevista</th>
+                                <th>Status</th>
+                                <th style="width: 150px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($culturas as $cultura)
+                                <tr>
+                                    <td>{{ $cultura->nome }}</td>
+                                    <td>{{ number_format($cultura->area, 2, ',', '.') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($cultura->data_plantio)->format('d/m/Y') }}</td>
+                                    <td>
+                                        @if ($cultura->colheita_prevista)
+                                            {{ \Carbon\Carbon::parse($cultura->colheita_prevista)->format('d/m/Y') }}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $badgeClass = match($cultura->status) {
+                                                'Ativa' => 'badge-success',
+                                                'Colheita' => 'badge-warning',
+                                                'Finalizada' => 'badge-danger',
+                                                default => 'badge-secondary',
+                                            };
+                                        @endphp
+                                        <span class="badge {{ $badgeClass }}">{{ $cultura->status }}</span>
+                                    </td>
+                                    <td>
+                                        {{-- Botão Editar --}}
+                                        <a href="{{ route('culturas.edit', $cultura->id) }}" class="btn btn-xs btn-info" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
+                                        {{-- Botão Excluir (Usando formulário para método DELETE) --}}
+                                        <form action="{{ route('culturas.destroy', $cultura->id) }}" method="POST" style="display: inline-block;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-xs btn-danger" onclick="return confirm('ATENÇÃO: Isso removerá a cultura e dados financeiros relacionados. Tem certeza que deseja excluir?')" title="Excluir">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+            
+            {{-- Rodapé do Card com Paginação --}}
+            @if($culturas->lastPage() > 1)
+                <div class="card-footer clearfix">
+                    {{ $culturas->links('vendor.pagination.bootstrap-4') }}
+                </div>
+            @endif
         </div>
-    @endif
+    </div>
 </div>
-{{-- Estilos simples para os badges de status --}}
-<style>
-.status-badge {
-    padding: 0.2rem 0.6rem;
-    border-radius: 9999px;
-    font-size: 0.8em;
-    font-weight: bold;
-    color: white;
-}
-.status-ativa { background-color: #10b981; } /* Verde */
-.status-inativa { background-color: #6b7280; } /* Cinza */
-.status-colheita { background-color: #f59e0b; } /* Amarelo */
-</style>
+
 @endsection
