@@ -19,11 +19,11 @@ class DashboardController extends Controller
     public function index()
     {
         // 1. Cálculo de Alerta de Estoque (CORRIGIDO AQUI)
-        // Usamos where('coluna', operador, subconsulta) para subconsultas escalares.
+        // Alterado de 'inventarios.item' para 'inventario.item' para corresponder ao FROM "inventario"
         $alertas_estoque = Inventario::where('quantidade', '<', function ($query) {
             $query->select('estoque_minimo')
                   ->from('culturas')
-                  ->whereRaw('culturas.nome = inventarios.item') // Ajuste o nome da tabela se necessário (singular/plural)
+                  ->whereRaw('culturas.nome = inventario.item') // <--- CORREÇÃO
                   ->limit(1);
         })->get(['item', 'quantidade', 'valor_unitario']);
 
