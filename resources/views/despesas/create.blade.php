@@ -1,75 +1,123 @@
 @extends('layout.master')
 
 @section('title', 'Nova Despesa')
+@section('title_page', 'Registro de Despesa (Geral ou Vinculada)')
 
 @section('content')
-<div class="content">
-    <h2>➕ Registrar Nova Despesa</h2>
-    
-    <form action="{{ route('despesas.store') }}" method="POST">
-        @csrf
-        
-        {{-- Campo de Associação à Cultura --}}
-        <div class="form-group">
-            <label for="cultura_id">Associar à Cultura (Opcional):</label>
-            {{-- $culturas deve ser passado do Controller: Cultura::pluck('nome', 'id') --}}
-            <select id="cultura_id" name="cultura_id">
-                <option value="">-- Nenhuma Cultura (Despesa Geral) --</option>
-                @foreach ($culturas as $id => $nome)
-                    <option value="{{ $id }}" {{ old('cultura_id') == $id ? 'selected' : '' }}>
-                        {{ $nome }}
-                    </option>
-                @endforeach
-            </select>
-            @error('cultura_id') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
-        
-        {{-- Campo Descrição --}}
-        <div class="form-group">
-            <label for="descricao">Descrição (Ex: Compra de Sementes, Manutenção de Trator):</label>
-            <input type="text" id="descricao" name="descricao" required 
-                value="{{ old('descricao') }}">
-            @error('descricao') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
 
-        {{-- Campo Valor --}}
-        <div class="form-group">
-            <label for="valor">Valor (R$):</label>
-            <input type="number" id="valor" name="valor" step="0.01" required 
-                value="{{ old('valor') }}">
-            @error('valor') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
+<div class="row">
+    <div class="col-md-7">
+        <div class="card card-danger card-outline">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-minus-circle mr-1"></i> Registrar Novo Gasto</h3>
+            </div>
+            
+            <form action="{{ route('despesas.store') }}" method="POST">
+                @csrf
+                <div class="card-body">
+                    
+                    {{-- Mensagens de erro de validação --}}
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <h5><i class="icon fas fa-ban"></i> Erro de Validação!</h5>
+                            Verifique os campos abaixo.
+                        </div>
+                    @endif
 
-        {{-- Campo Data --}}
-<div class="form-group">
-    <label for="data">Data do Lançamento:</label>
-    <input type="date" id="data" name="data" required 
-        value="{{ old('data', date('Y-m-d')) }}"> {{-- <-- CORRIGIDO (usando 'data') --}}
-    @error('data') <span class="error-message">{{ $message }}</span> @enderror
+                    <div class="row">
+                        {{-- Data do Gasto --}}
+                        <div class="form-group col-md-6">
+                            <label for="data">Data do Gasto</label>
+                            <input type="date" class="form-control @error('data') is-invalid @enderror" id="data" name="data" value="{{ old('data', now()->format('Y-m-d')) }}" required>
+                            @error('data')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+
+                        {{-- Valor --}}
+                        <div class="form-group col-md-6">
+                            <label for="valor">Valor (R$)</label>
+                            <input type="number" step="0.01" class="form-control @error('valor') is-invalid @enderror" id="valor" name="valor" value="{{ old('valor') }}" placeholder="Ex: 150.75" required min="0.01">
+                            @error('valor')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        {{-- Categoria --}}
+                        <div class="form-group col-md-6">
+                            <label for="categoria">Categoria</label>
+                            <select class="form-control @error('categoria') is-invalid @enderror" id="categoria" name="categoria" required>
+                                <option value="">Selecione a Categoria</option>
+                                @foreach ($categorias as $cat)
+                                    <option value="{{ $cat }}" {{ old('categoria') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                                @endforeach
+                            </select>
+                            @error('categoria')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+
+                        {{-- Cultura (Opcional) --}}
+                        <div class="form-group col-md-6">
+                            <label for="cultura_id">Vincular à Cultura (Opcional)</label>
+                            <select class="form-control @error('cultura_id') is-invalid @enderror" id="cultura_id" name="cultura_id">
+                                <option value="">Despesa Geral (Sem Vinculação)</option>
+                                @foreach ($culturas as $cultura)
+                                    <option value="{{ $cultura->id }}" {{ old('cultura_id') == $cultura->id ? 'selected' : '' }}>{{ $cultura->nome }}</option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Gastos gerais (Combustível, Eletricidade) devem ficar sem vínculo.</small>
+                            @error('cultura_id')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    {{-- Descrição --}}
+                    <div class="form-group">
+                        <label for="descricao">Descrição Detalhada</label>
+                        <input type="text" class="form-control @error('descricao') is-invalid @enderror" id="descricao" name="descricao" value="{{ old('descricao') }}" placeholder="Ex: Abastecimento do trator para colheita" required>
+                        @error('descricao')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
+                    </div>
+
+                    {{-- Observações --}}
+                    <div class="form-group">
+                        <label for="observacoes">Observações (Opcional)</label>
+                        <textarea class="form-control @error('observacoes') is-invalid @enderror" id="observacoes" name="observacoes" rows="2">{{ old('observacoes') }}</textarea>
+                        @error('observacoes')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
+                    </div>
+
+                </div>
+                
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-save mr-1"></i> Salvar Despesa
+                    </button>
+                    <a href="{{ route('despesas.index') }}" class="btn btn-secondary ml-2">
+                        <i class="fas fa-times-circle mr-1"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="callout callout-info mt-4">
+            <h5>Sobre Despesas!</h5>
+            <p>
+                Despesas **diretas** (sementes, insumos específicos) devem ser registradas na tela de **Edição da Cultura**.
+            </p>
+            <p>
+                Use este formulário para despesas **gerais** (combustível, eletricidade, equipamentos) que são compartilhadas por várias culturas e não devem ser contabilizadas no custeio direto de uma única cultura. Para estas, deixe o campo "Vincular à Cultura" como **Despesa Geral**.
+            </p>
+        </div>
+    </div>
 </div>
 
-        {{-- Campo Categoria --}}
-        <div class="form-group">
-            <label for="categoria">Categoria:</label>
-            {{-- As categorias devem ser definidas no Controller ou em um array de constantes --}}
-            <select id="categoria" name="categoria" required>
-                <option value="">-- Selecione a Categoria --</option>
-                @php 
-                    $categorias = ['Insumos', 'Mão de Obra', 'Manutenção', 'Combustível', 'Impostos', 'Outros'];
-                @endphp
-                @foreach ($categorias as $categoria)
-                    <option value="{{ $categoria }}" {{ old('categoria') == $categoria ? 'selected' : '' }}>
-                        {{ $categoria }}
-                    </option>
-                @endforeach
-            </select>
-            @error('categoria') <span class="error-message">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="flex justify-start gap-4 mt-6">
-            <button type="submit" class="btn-primary">Registrar Despesa</button>
-            <a href="{{ route('despesas.index') }}" class="btn-secondary">Voltar</a>
-        </div>
-    </form>
-</div>
 @endsection
