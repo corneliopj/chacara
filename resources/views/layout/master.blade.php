@@ -65,7 +65,6 @@
     </nav>
     
     {{-- 2. MENU LATERAL PRINCIPAL (Sidebar) --}}
-    {{-- Usando a classe sidebar-dark-primary para o esquema de cores padrão do AdminLTE --}}
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         {{-- Logo --}}
         <a href="{{ route('dashboard') }}" class="brand-link">
@@ -79,7 +78,7 @@
                     @php 
                         $currentRoute = Route::currentRouteName();
                         
-                        // CORREÇÃO DE SINTAXE: Usando a sintaxe function() use ($currentRoute) para compatibilidade PHP
+                        // Sintaxe de função anônima tradicional (compatível com todas as versões)
                         $isActive = function($route) use ($currentRoute) {
                             return $currentRoute === $route ? 'active' : '';
                         };
@@ -150,7 +149,6 @@
                 <div class="row mb-2">
                     <div class="col-sm-6">
                         {{-- O título da página é renderizado aqui --}}
-                        {{-- Usando o @yield('title') da View filha se 'title_page' não for definido --}}
                         <h1 class="m-0 text-dark">@yield('title_page', @yield('title', 'Dashboard'))</h1>
                     </div>
                 </div>
