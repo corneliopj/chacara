@@ -1,4 +1,6 @@
-<?php namespace App\Models;
+<?php
+
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,41 +11,23 @@ class Cultura extends Model
 
     protected $table = 'culturas';
 
+    /**
+     * Os atributos que são mass assignable (preenchíveis em massa).
+     * Incluindo os campos do formulário de Nova Cultura.
+     */
     protected $fillable = [
         'nome',
-        'area_ha',
-        'data_plantio',
-        'data_colheita_prevista',
-        'status',
-        'observacoes',
+        'area', // <--- Adicionado
+        'data_plantio', // <--- Adicionado
+        'colheita_prevista', // <--- Adicionado
+        'status', // <--- Adicionado
+        'observacoes', // <--- Adicionado
+        'estoque_minimo',
     ];
-
+    
+    // Adicionar tipos de data para conversão automática
     protected $casts = [
         'data_plantio' => 'date',
-        'data_colheita_prevista' => 'date',
+        'colheita_prevista' => 'date',
     ];
-
-    /**
-     * Relacionamento com Despesas (Despesas associadas a esta cultura)
-     */
-    public function despesas()
-    {
-        return $this->hasMany(Despesa::class, 'cultura_id');
-    }
-
-    /**
-     * Relacionamento com Receitas (Vendas associadas a esta cultura)
-     */
-    public function receitas()
-    {
-        return $this->hasMany(Receita::class, 'cultura_id');
-    }
-
-    /**
-     * Relacionamento com Tarefas (Manejos e atividades associadas a esta cultura)
-     */
-    public function tarefas()
-    {
-        return $this->hasMany(Tarefa::class, 'cultura_id');
-    }
 }
