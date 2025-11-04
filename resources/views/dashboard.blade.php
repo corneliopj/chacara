@@ -1,119 +1,145 @@
 @extends('layout.master')
 
-@section('title', 'Dashboard')
+@section('title', 'Dashboard - Resumo Financeiro')
 
 @section('content')
-<div class="content">
-    <h2>📊 Dashboard da Fazenda</h2>
 
-    <div class="grid-3">
-        <div class="card bg-green-100 border-green-500">
-            <h3>Receitas Totais</h3>
-            <p class="text-3xl text-green-700">R$ {{ number_format($total_receitas, 2, ',', '.') }}</p>
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            {{-- Card Receitas --}}
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>R$ {{ number_format($total_receitas, 2, ',', '.') }}</h3>
+                    <p>Receitas Totais</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <a href="{{ route('receitas.index') }}" class="small-box-footer">
+                    Detalhes <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
         </div>
-        <div class="card bg-red-100 border-red-500">
-            <h3>Gastos Totais</h3>
-            <p class="text-3xl text-red-700">R$ {{ number_format($total_gastos, 2, ',', '.') }}</p>
+
+        <div class="col-lg-3 col-6">
+            {{-- Card Despesas (Gastos) --}}
+            <div class="small-box bg-danger">
+                <div class="inner">
+                    {{-- CORREÇÃO: Usando $total_despesas em vez de $total_gastos --}}
+                    <h3>R$ {{ number_format($total_despesas, 2, ',', '.') }}</h3> 
+                    <p>Despesas (Gastos) Totais</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-money-bill-wave-alt"></i>
+                </div>
+                <a href="{{ route('despesas.index') }}" class="small-box-footer">
+                    Detalhes <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
         </div>
-        <div class="card bg-blue-100 border-blue-500">
-            <h3>Lucro (Total)</h3>
-            <p class="text-3xl text-blue-700">R$ {{ number_format($total_lucro, 2, ',', '.') }}</p>
+        
+        <div class="col-lg-3 col-6">
+            {{-- Card Balanço/Lucro --}}
+            <div class="small-box bg-primary">
+                <div class="inner">
+                    <h3>R$ {{ number_format($balanco_geral, 2, ',', '.') }}</h3> 
+                    <p>Balanço (Lucro/Prejuízo)</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <a href="{{ route('relatorios.financeiro_cultura') }}" class="small-box-footer">
+                    Relatório <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-6">
+            {{-- Card Culturas --}}
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>{{ \App\Models\Cultura::count() }}</h3> 
+                    <p>Culturas Ativas</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <a href="{{ route('culturas.index') }}" class="small-box-footer">
+                    Gerenciar <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
         </div>
     </div>
-
-    <div class="flex gap-4 mt-5">
-        <a href="{{ route('despesas.create') }}" class="btn-primary">➕ Nova Despesa</a>
-        <a href="{{ route('receitas.create') }}" class="btn-primary">➕ Nova Receita</a>
-        <a href="{{ route('inventario.create') }}" class="btn-primary">➕ Adicionar Inventário</a>
-    </div>
-
-    {{-- ALERTA DE ESTOQUE E COLHEITA --}}
-    <h3 class="mt-8">⚠️ Alertas</h3>
-    @if ($alertas_estoque->isNotEmpty() || $alertas_colheita->isNotEmpty())
-        <div class="alert alert-warning">
-            @if ($alertas_estoque->isNotEmpty())
-                <strong>Estoque Baixo:</strong> 
-                @foreach ($alertas_estoque as $alerta)
-                    {{ $alerta->item }} ({{ $alerta->quantidade }})@if (!$loop->last), @endif
-                @endforeach
-            @endif
-            @if ($alertas_estoque->isNotEmpty() && $alertas_colheita->isNotEmpty()) | @endif
-            @if ($alertas_colheita->isNotEmpty())
-                <strong>Colheita Próxima (7 dias):</strong> 
-                @foreach ($alertas_colheita as $alerta)
-                    {{ $alerta->nome }} ({{ \Carbon\Carbon::parse($alerta->data_colheita_prevista)->format('d/m/Y') }})@if (!$loop->last), @endif
-                @endforeach
-            @endif
+    
+    {{-- ALERTAS DE ESTOQUE (Card) --}}
+    @if($alertas_estoque->isNotEmpty())
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-warning card-outline">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-exclamation-triangle"></i> Alertas de Estoque Mínimo</h3>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped table-valign-middle">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantidade Atual</th>
+                                <th>Preço Unitário</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($alertas_estoque as $alerta)
+                            <tr>
+                                <td>{{ $alerta->item }}</td>
+                                <td>
+                                    <span class="badge badge-danger">{{ $alerta->quantidade }}</span>
+                                </td>
+                                <td>R$ {{ number_format($alerta->valor_unitario, 2, ',', '.') }}</td>
+                                <td>
+                                    <a href="#" class="text-muted">
+                                        <i class="fas fa-search"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    @else
-        <p>Nenhum alerta crítico no momento.</p>
+    </div>
     @endif
     
-    {{-- TAREFAS PENDENTES --}}
-    <h3 class="mt-8">📋 Próximas Tarefas Pendentes</h3>
-    <ul class="list-disc ml-5">
-        @forelse ($tarefas_pendentes as $tarefa)
-            <li>
-                {{ \Carbon\Carbon::parse($tarefa->data_prevista)->format('d/m/Y') }} - 
-                **{{ $tarefa->tipo }}** em {{ $tarefa->cultura->nome ?? 'Cultura Removida' }}
-            </li>
-        @empty
-            <li>Nenhuma tarefa pendente encontrada.</li>
-        @endforelse
-    </ul>
-
-    {{-- GRÁFICOS --}}
-    <div class="flex justify-between mt-10">
-        <div class="w-2/3">
-            <h3>Despesas e Receitas Mensais</h3>
-            <canvas id="barrasMensais"></canvas>
+    {{-- CULTURAS MAIS CARAS (Card de Exemplo) --}}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card card-secondary card-outline">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-leaf"></i> 5 Culturas com Maior Despesa</h3>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="products-list product-list-in-card pl-2 pr-2">
+                        @foreach($culturas_mais_caras as $cultura_despesa)
+                        <li class="item">
+                            <div class="product-info">
+                                {{ $cultura_despesa->cultura->nome ?? 'Cultura Não Encontrada' }}
+                                <span class="product-description float-right text-danger">
+                                    R$ {{ number_format($cultura_despesa->total_despesa, 2, ',', '.') }}
+                                </span>
+                            </div>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{{ route('despesas.index') }}" class="uppercase">Ver Todas as Despesas</a>
+                </div>
+            </div>
         </div>
-        <div class="w-1/3 ml-4">
-            <h3>Lucro por Cultura</h3>
-            <canvas id="pizzaLucro"></canvas>
-        </div>
+        
+        {{-- Adicionar outro Card aqui (ex: Tarefas Recentes) --}}
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        fetch('{{ route('api.graficos') }}')
-            .then(response => response.json())
-            .then(data => {
-                // GRÁFICO 1: Barras Mensais
-                const ctxBarras = document.getElementById('barrasMensais').getContext('2d');
-                const meses = data.mensal.map(item => item.mes);
-                const despesas = data.mensal.map(item => parseFloat(item.total_despesas));
-                const receitas = data.mensal.map(item => parseFloat(item.total_receitas));
-
-                new Chart(ctxBarras, {
-                    type: 'bar',
-                    data: {
-                        labels: meses,
-                        datasets: [
-                            { label: 'Despesas', data: despesas, backgroundColor: 'rgba(255, 99, 132, 0.5)' },
-                            { label: 'Receitas', data: receitas, backgroundColor: 'rgba(75, 192, 192, 0.5)' }
-                        ]
-                    },
-                    options: { scales: { y: { beginAtZero: true } } }
-                });
-
-                // GRÁFICO 2: Pizza Lucro por Cultura
-                const ctxPizza = document.getElementById('pizzaLucro').getContext('2d');
-                const culturas = data.lucro_cultura.map(item => item.nome);
-                const lucros = data.lucro_cultura.map(item => parseFloat(item.lucro));
-
-                new Chart(ctxPizza, {
-                    type: 'pie',
-                    data: {
-                        labels: culturas,
-                        datasets: [{
-                            data: lucros,
-                            backgroundColor: lucros.map(() => `hsl(${Math.random() * 360}, 70%, 50%)`),
-                        }]
-                    }
-                });
-            });
-    });
-</script>
 @endsection
