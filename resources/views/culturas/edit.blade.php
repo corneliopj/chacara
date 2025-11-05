@@ -149,10 +149,12 @@
 $(document).ready(function() {
     let despesas = [];
 
+    // Função auxiliar para formatar moeda
     function formatCurrency(value) {
         return 'R$ ' + parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    // Função principal que redesenha a tabela e atualiza o total
     function updateCart() {
         const $lista = $('#lista-despesas');
         $lista.empty();
@@ -183,12 +185,15 @@ $(document).ready(function() {
     }
 
     // Ação de Adicionar Item
-    $('#adicionar-item').on('click', function() {
+    $('#adicionar-item').on('click', function(e) {
+        e.preventDefault(); // Impede qualquer ação padrão, caso o botão esteja dentro de um form
+
         const categoria = $('#item-categoria').val();
         const descricao = $('#item-descricao').val();
-        const valor = parseFloat($('#item-valor').val());
+        // Garante que o valor é lido como string e convertido para float, ou 0 se for vazio/inválido
+        const valor = parseFloat($('#item-valor').val().replace(',', '.')) || 0; 
 
-        if (categoria && descricao && valor && valor > 0) {
+        if (categoria && descricao && valor > 0) {
             despesas.push({
                 categoria: categoria,
                 descricao: descricao,
@@ -202,14 +207,14 @@ $(document).ready(function() {
             
             updateCart();
         } else {
-            alert('Por favor, preencha todos os campos do item corretamente.');
+            alert('Por favor, preencha todos os campos do item corretamente (Categoria, Descrição e Valor > 0).');
         }
     });
 
     // Ação de Remover Item (usando delegação de evento)
     $('#lista-despesas').on('click', '.remover-item', function() {
         const index = $(this).data('index');
-        despesas.splice(index, 1); // Remove 1 elemento na posição 'index'
+        despesas.splice(index, 1);
         updateCart();
     });
 
