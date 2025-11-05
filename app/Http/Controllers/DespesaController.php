@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Despesa;
 use App\Models\Cultura;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // <--- CORREÇÃO: Necessário para transações
+use Illuminate\Support\Facades\DB; // <--- Importação necessária
 
 class DespesaController extends Controller
 {
@@ -97,8 +97,9 @@ class DespesaController extends Controller
         try {
             DB::beginTransaction();
             
-            // CORREÇÃO: Usando Inserção em Massa para performance e estabilidade
-            Despesa::insert($dadosParaInserir); 
+            // CORREÇÃO: Usando o DB::table() para inserção em massa. 
+            // Mais seguro contra problemas de $fillable.
+            DB::table('despesas')->insert($dadosParaInserir); 
 
             DB::commit();
 
