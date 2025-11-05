@@ -77,33 +77,40 @@ class DespesaController extends Controller
             'itens.*.valor' => 'required|numeric|min:0.01',
         ]);
 
+        $culturaId = $request->cultura_id;
+        $dataBase = $request->data_base;
+        $dadosParaInserir = [];
+        $agora = now(); // Otimiza a chamada da data/hora
+
+        foreach ($request->itens as $item) {
+            $dadosParaInserir[] = [
+                'cultura_id' => $culturaId,
+                'data' => $dataBase,
+                'categoria' => $item['categoria'],
+                'descricao' => $item['descricao'],
+                'valor' => $item['valor'],
+                'created_at' => $agora,
+                'updated_at' => $agora,
+            ];
+        }
+
         try {
             DB::beginTransaction();
-
-            $culturaId = $request->cultura_id;
-            $dataBase = $request->data_base;
             
-            foreach ($request->itens as $item) {
-                Despesa::create([
-                    'cultura_id' => $culturaId,
-                    'data' => $dataBase,
-                    'categoria' => $item['categoria'],
-                    'descricao' => $item['descricao'],
-                    'valor' => $item['valor'],
-                ]);
-            }
+            // CORREÇÃO: Usando Inserção em Massa para performance e estabilidade
+            Despesa::insert($dadosParaInserir); 
 
             DB::commit();
 
             return redirect()->route('culturas.edit', $culturaId)
-                             ->with('success', 'As despesas foram registradas na cultura com sucesso!');
+                             ->with('success', count($dadosParaInserir) . ' despesas registradas na cultura com sucesso!');
         
         } catch (\Exception $e) {
             DB::rollBack();
             // Em caso de erro, redireciona de volta com uma mensagem
             return redirect()->back()
                              ->withInput()
-                             ->withErrors(['erro_bd' => 'Não foi possível salvar as despesas: ' . $e->getMessage()]);
+                             ->with('error', 'Não foi possível salvar as despesas: ' . $e->getMessage());
         }
     }
     
