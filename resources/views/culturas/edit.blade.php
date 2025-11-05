@@ -10,7 +10,6 @@
 @endphp
 
 <div class="row">
-    {{-- COLUNA ESQUERDA: Informações Principais da Cultura --}}
     <div class="col-md-6">
         <div class="card card-info card-outline">
             <div class="card-header">
@@ -21,38 +20,49 @@
                     @csrf
                     @method('PUT')
                     
-                    {{-- Campos de Edição da Cultura --}}
-                  <div class="form-group">
-    <label for="nome">Nome da Cultura:</label>
-    <input type="text" name="nome" id="nome" class="form-control @error('nome') is-invalid @enderror" value="{{ old('nome', $cultura->nome) }}" required>
-    @error('nome')
-        <span class="invalid-feedback">{{ $message }}</span>
-    @enderror
-</div>
+                    {{-- CAMPOS DE EDIÇÃO DA CULTURA (PREENCHIDOS PELO MODEL) --}}
+                    
+                    <div class="form-group">
+                        <label for="nome">Nome da Cultura:</label>
+                        <input type="text" name="nome" id="nome" class="form-control @error('nome') is-invalid @enderror" value="{{ old('nome', $cultura->nome) }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="area_m2">Área (m²):</label>
+                        <input type="number" step="0.01" name="area_m2" id="area_m2" class="form-control @error('area_m2') is-invalid @enderror" value="{{ old('area_m2', $cultura->area_m2) }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="data_plantio">Data do Plantio:</label>
+                        <input type="date" name="data_plantio" id="data_plantio" class="form-control @error('data_plantio') is-invalid @enderror" value="{{ old('data_plantio', $cultura->data_plantio) }}" required>
+                    </div>
 
-<div class="form-group">
-    <label for="area_m2">Área (m²):</label>
-    <input type="number" step="0.01" name="area_m2" id="area_m2" class="form-control @error('area_m2') is-invalid @enderror" value="{{ old('area_m2', $cultura->area_m2) }}" required>
-    @error('area_m2')
-        <span class="invalid-feedback">{{ $message }}</span>
-    @enderror
-</div>
+                    <div class="form-group">
+                        <label for="colheita_prevista">Colheita Prevista:</label>
+                        <input type="date" name="colheita_prevista" id="colheita_prevista" class="form-control @error('colheita_prevista') is-invalid @enderror" value="{{ old('colheita_prevista', $cultura->colheita_prevista) }}">
+                    </div>
 
-{{-- 🚨 ADICIONE AQUI OUTROS CAMPOS OBRIGATÓRIOS DA TABELA CULTURAS 🚨 --}}
+                    <div class="form-group">
+                        <label for="status">Status da Cultura:</label>
+                        <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
+                            <option value="Plantio" {{ old('status', $cultura->status) == 'Plantio' ? 'selected' : '' }}>Em Plantio</option>
+                            <option value="Crescimento" {{ old('status', $cultura->status) == 'Crescimento' ? 'selected' : '' }}>Em Crescimento</option>
+                            <option value="Colheita" {{ old('status', $cultura->status) == 'Colheita' ? 'selected' : '' }}>Em Colheita</option>
+                            <option value="Finalizada" {{ old('status', $cultura->status) == 'Finalizada' ? 'selected' : '' }}>Finalizada</option>
+                        </select>
+                    </div>
 
-<div class="form-group">
-    <label for="status">Status da Cultura:</label>
-    {{-- Exemplo: Se 'status' for obrigatório --}}
-    <select name="status" id="status" class="form-control" required>
-        <option value="Plantio" {{ old('status', $cultura->status) == 'Plantio' ? 'selected' : '' }}>Em Plantio</option>
-        <option value="Crescimento" {{ old('status', $cultura->status) == 'Crescimento' ? 'selected' : '' }}>Em Crescimento</option>
-        <option value="Colheita" {{ old('status', $cultura->status) == 'Colheita' ? 'selected' : '' }}>Em Colheita</option>
-        <option value="Finalizada" {{ old('status', $cultura->status) == 'Finalizada' ? 'selected' : '' }}>Finalizada</option>
-    </select>
-</div>
-{{-- FIM DOS CAMPOS ADICIONAIS --}}
+                    <div class="form-group">
+                        <label for="estoque_minimo">Estoque Mínimo (Kg/unidade):</label>
+                        <input type="number" step="0.01" name="estoque_minimo" id="estoque_minimo" class="form-control @error('estoque_minimo') is-invalid @enderror" value="{{ old('estoque_minimo', $cultura->estoque_minimo) }}">
+                    </div>
 
-<button type="submit" class="btn btn-info mt-2"><i class="fas fa-save mr-1"></i> Salvar Alterações</button>
+                    <div class="form-group">
+                        <label for="observacoes">Observações:</label>
+                        <textarea name="observacoes" id="observacoes" class="form-control @error('observacoes') is-invalid @enderror" rows="3">{{ old('observacoes', $cultura->observacoes) }}</textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-info mt-2"><i class="fas fa-save mr-1"></i> Salvar Alterações</button>
                 </form>
             </div>
         </div>

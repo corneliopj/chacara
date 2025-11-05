@@ -74,25 +74,34 @@ class CulturaController extends Controller
      * Atualiza a cultura no banco de dados.
      */
     public function update(Request $request, Cultura $cultura)
-    {
-        dd($request->all());
-        $request->validate([
-            'nome' => 'required|string|max:255|unique:culturas,nome,' . $cultura->id,
-            'area_m2' => 'required|numeric|min:0.01', // <--- CAMPO NOVO/ALTERADO
-            'data_plantio' => 'required|date',
-            'colheita_prevista' => 'nullable|date|after_or_equal:data_plantio',
-            'status' => 'required|string|in:Ativa,Plantio Pendente,Colheita,Finalizada',
-            'estoque_minimo' => 'nullable|integer|min:0',
-            'observacoes' => 'nullable|string',
-        ], [
-            // Mensagens de erro
-        ]);
-
-        $cultura->update($request->all());
-
-        return redirect()->route('culturas.index')
-                         ->with('success', 'Cultura atualizada com sucesso!');
+{
+    // 🚨 Validação completa com base no seu Model $fillable
+    $request->validate([
+        'nome' => 'required|string|max:255',
+        'area_m2' => 'required|numeric|min:0.01',
+        'data_plantio' => 'required|date',         // <-- Adicionado
+        'colheita_prevista' => 'nullable|date',    // <-- Adicionado (Assumindo que pode ser nulo)
+        'status' => 'required|string',             // <-- Adicionado
+        'estoque_minimo' => 'nullable|numeric',    // <-- Adicionado (Assumindo que pode ser nulo)
+        'observacoes' => 'nullable|string',        // <-- Adicionado
+    ]);
+    
+    try {
+        // Se a validação e o $fillable estiverem corretos, a atualização deve funcionar
+        $cultura->update($request->all()); 
+        
+        return redirect()
+            ->route('culturas.edit', $cultura->id)
+            ->with('success', 'Cultura atualizada com sucesso!');
+    
+    } catch (\Exception $e) {
+        // Captura e exibe o erro exato, se houver um problema no DB (pouco provável agora)
+        return redirect()
+            ->back()
+            ->withInput()
+            ->with('error', 'Erro ao atualizar a Cultura: ' . $e->getMessage());
     }
+}
 
     // ... (Método destroy omitido)
 }
