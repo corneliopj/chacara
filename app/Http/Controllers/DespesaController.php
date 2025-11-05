@@ -68,6 +68,11 @@ class DespesaController extends Controller
      */
     public function storeMultiCultura(Request $request)
     {
+        // 🚨 PONTO DE DEBUG 1: VERIFICA SE A REQUISIÇÃO CHEGA E PASSA NA VALIDAÇÃO
+        // Se esta linha for executada, a requisição chegou ao Controller e os dados são válidos.
+        // Se a página carregar normalmente, o erro está na rota ou em alguma camada antes.
+        // dd($request->all()); 
+        
         $request->validate([
             'cultura_id' => 'required|exists:culturas,id',
             'data_base' => 'required|date',
@@ -80,7 +85,7 @@ class DespesaController extends Controller
         $culturaId = $request->cultura_id;
         $dataBase = $request->data_base;
         $dadosParaInserir = [];
-        $agora = now(); // Otimiza a chamada da data/hora
+        $agora = now();
 
         foreach ($request->itens as $item) {
             $dadosParaInserir[] = [
@@ -93,12 +98,14 @@ class DespesaController extends Controller
                 'updated_at' => $agora,
             ];
         }
+        
+        // 🚨 PONTO DE DEBUG 2: VERIFICA OS DADOS PRONTOS PARA INSERÇÃO
+        // Se esta linha for executada, os dados estão estruturados corretamente.
+        // dd($dadosParaInserir); 
 
         try {
             DB::beginTransaction();
             
-            // CORREÇÃO: Usando o DB::table() para inserção em massa. 
-            // Mais seguro contra problemas de $fillable.
             DB::table('despesas')->insert($dadosParaInserir); 
 
             DB::commit();
@@ -108,13 +115,16 @@ class DespesaController extends Controller
         
         } catch (\Exception $e) {
             DB::rollBack();
-            // Em caso de erro, redireciona de volta com uma mensagem
+            
+            // 🚨 PONTO DE DEBUG 3: EXIBE QUALQUER ERRO DE BANCO DE DADOS
+            // Se o erro cair aqui, haverá uma mensagem clara sobre o que falhou no DB.
+            // dd($e->getMessage()); 
+            
             return redirect()->back()
                              ->withInput()
                              ->with('error', 'Não foi possível salvar as despesas: ' . $e->getMessage());
         }
     }
-    
     /**
      * Exibe uma despesa específica (Opcional).
      */
