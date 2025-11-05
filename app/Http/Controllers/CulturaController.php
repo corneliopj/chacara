@@ -75,6 +75,7 @@ class CulturaController extends Controller
      */
     public function update(Request $request, Cultura $cultura)
     {
+        dd($request->all());
         $request->validate([
             'nome' => 'required|string|max:255|unique:culturas,nome,' . $cultura->id,
             'area_m2' => 'required|numeric|min:0.01', // <--- CAMPO NOVO/ALTERADO
