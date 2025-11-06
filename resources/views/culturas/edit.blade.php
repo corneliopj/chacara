@@ -154,10 +154,11 @@
                         </tfoot>
                     </table>
 
-                    {{-- Formulário de Adição de Item --}}
+                   {{-- Formulário de Adição de Item --}}
                     <div class="row mt-3 p-2 border-top border-secondary">
                         <div class="col-4">
-                            <select id="item-categoria" class="form-control form-control-sm" required>
+                            {{-- REMOVIDO o 'required' para evitar validação nativa ao salvar o carrinho --}}
+                            <select id="item-categoria" class="form-control form-control-sm">
                                 <option value="">Selecione a Categoria</option>
                                 @foreach ($categorias as $categoria)
                                     @if (in_array($categoria, ['Insumo', 'Semente', 'Mão-de-Obra', 'Outro Direto']))
@@ -167,10 +168,12 @@
                             </select>
                         </div>
                         <div class="col-4">
-                            <input type="text" id="item-descricao" class="form-control form-control-sm" placeholder="Descrição do gasto" required>
+                            {{-- REMOVIDO o 'required' --}}
+                            <input type="text" id="item-descricao" class="form-control form-control-sm" placeholder="Descrição do gasto">
                         </div>
                         <div class="col-2">
-                            <input type="number" step="0.01" id="item-valor" class="form-control form-control-sm" placeholder="Valor" required min="0.01">
+                            {{-- REMOVIDO o 'required' --}}
+                            <input type="number" step="0.01" id="item-valor" class="form-control form-control-sm" placeholder="Valor" min="0.01">
                         </div>
                         <div class="col-2">
                             <button type="button" class="btn btn-sm btn-success btn-block" id="adicionar-item">
