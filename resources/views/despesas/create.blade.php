@@ -24,6 +24,7 @@
                         </div>
                     @endif
 
+                    {{-- PRIMEIRA LINHA: Data e Valor --}}
                     <div class="row">
                         {{-- Data do Gasto --}}
                         <div class="form-group col-md-6">
@@ -34,22 +35,24 @@
                             @enderror
                         </div>
 
-                        {{-- Valor --}}
+                        {{-- Valor da Despesa --}}
                         <div class="form-group col-md-6">
                             <label for="valor">Valor (R$)</label>
-                            <input type="number" step="0.01" class="form-control @error('valor') is-invalid @enderror" id="valor" name="valor" value="{{ old('valor') }}" placeholder="Ex: 150.75" required min="0.01">
+                            <input type="number" step="0.01" class="form-control @error('valor') is-invalid @enderror" id="valor" name="valor" value="{{ old('valor') }}" required min="0.01">
                             @error('valor')
                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                             @enderror
                         </div>
                     </div>
                     
+                    {{-- SEGUNDA LINHA: Categoria e Vincular à Cultura --}}
                     <div class="row">
-                        {{-- Categoria --}}
-                        <div class="form-group col-md-6">
+                         {{-- Categoria --}}
+                         <div class="form-group col-md-6">
                             <label for="categoria">Categoria</label>
                             <select class="form-control @error('categoria') is-invalid @enderror" id="categoria" name="categoria" required>
-                                <option value="">Selecione a Categoria</option>
+                                <option value="">-- Selecione a Categoria --</option>
+                                {{-- $categorias deve ser carregado do controller --}}
                                 @foreach ($categorias as $cat)
                                     <option value="{{ $cat }}" {{ old('categoria') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
                                 @endforeach
@@ -59,32 +62,33 @@
                             @enderror
                         </div>
 
-                        {{-- Cultura (Opcional) --}}
+                        {{-- Vincular à Cultura --}}
                         <div class="form-group col-md-6">
                             <label for="cultura_id">Vincular à Cultura (Opcional)</label>
                             <select class="form-control @error('cultura_id') is-invalid @enderror" id="cultura_id" name="cultura_id">
-                                <option value="">Despesa Geral (Sem Vinculação)</option>
+                                <option value="">-- Despesa Geral --</option>
                                 @foreach ($culturas as $cultura)
-                                    <option value="{{ $cultura->id }}" {{ old('cultura_id') == $cultura->id ? 'selected' : '' }}>{{ $cultura->nome }}</option>
+                                    <option value="{{ $cultura->id }}" {{ old('cultura_id') == $cultura->id ? 'selected' : '' }}>
+                                        {{ $cultura->nome }}
+                                    </option>
                                 @endforeach
                             </select>
-                            <small class="form-text text-muted">Gastos gerais (Combustível, Eletricidade) devem ficar sem vínculo.</small>
                             @error('cultura_id')
                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                             @enderror
                         </div>
                     </div>
-
-                    {{-- Descrição --}}
+                    
+                    {{-- Descrição (Linha Inteira) --}}
                     <div class="form-group">
-                        <label for="descricao">Descrição Detalhada</label>
-                        <input type="text" class="form-control @error('descricao') is-invalid @enderror" id="descricao" name="descricao" value="{{ old('descricao') }}" placeholder="Ex: Abastecimento do trator para colheita" required>
+                        <label for="descricao">Descrição</label>
+                        <input type="text" class="form-control @error('descricao') is-invalid @enderror" id="descricao" name="descricao" value="{{ old('descricao') }}" required>
                         @error('descricao')
                             <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                         @enderror
                     </div>
-
-                    {{-- Observações --}}
+                    
+                    {{-- Observações (Linha Inteira) --}}
                     <div class="form-group">
                         <label for="observacoes">Observações (Opcional)</label>
                         <textarea class="form-control @error('observacoes') is-invalid @enderror" id="observacoes" name="observacoes" rows="2">{{ old('observacoes') }}</textarea>

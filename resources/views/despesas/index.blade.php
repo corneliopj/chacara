@@ -5,6 +5,11 @@
 
 @section('content')
 
+@php
+    use Illuminate\Support\Str;
+    use Carbon\Carbon;
+@endphp
+
 <div class="row">
     <div class="col-12">
         <div class="card card-danger card-outline">
@@ -37,41 +42,54 @@
                         Nenhuma despesa registrada ainda. Use o botão **Nova Despesa** para começar.
                     </div>
                 @else
-                    <table class="table table-striped table-valign-middle">
+                    <table class="table table-sm table-striped">
                         <thead>
                             <tr>
-                                <th>Data</th>
-                                <th>Cultura</th>
-                                <th>Categoria</th>
+                                <th style="width: 10%">Data</th>
+                                <th style="width: 25%">Cultura Vinculada</th>
+                                <th style="width: 15%">Categoria</th>
                                 <th>Descrição</th>
-                                <th>Valor (R$)</th>
-                                <th style="width: 150px;">Ações</th>
+                                <th style="width: 10%" class="text-right">Valor (R$)</th>
+                                <th style="width: 10%">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($despesas as $despesa)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($despesa->data)->format('d/m/Y') }}</td>
+                                    {{-- Data Formatada --}}
+                                    <td>{{ Carbon::parse($despesa->data)->format('d/m/Y') }}</td> 
+                                    
+                                    {{-- Cultura Vinculada --}}
                                     <td>
-                                        {{-- Exibe o nome da cultura ou 'Geral' se não estiver vinculada --}}
-                                        <span class="badge {{ $despesa->cultura_id ? 'badge-primary' : 'badge-secondary' }}">
-                                            {{ $despesa->cultura->nome ?? 'Geral' }} 
-                                        </span>
+                                        @if ($despesa->cultura)
+                                            <a href="{{ route('culturas.edit', $despesa->cultura->id) }}" class="text-info font-weight-bold">
+                                                {{ $despesa->cultura->nome }}
+                                            </a>
+                                        @else
+                                            <span class="badge badge-secondary">Geral</span>
+                                        @endif
                                     </td>
+                                    
+                                    {{-- Categoria --}}
                                     <td>{{ $despesa->categoria }}</td>
-                                    <td>{{ Str::limit($despesa->descricao, 50) }}</td> {{-- Limita a descrição para caber na tela --}}
-                                    <td>
-                                        <span class="text-danger font-weight-bold">
-                                            R$ {{ number_format($despesa->valor, 2, ',', '.') }}
-                                        </span>
+                                    
+                                    {{-- Descrição Truncada --}}
+                                    <td title="{{ $despesa->descricao }}">
+                                        {{ Str::limit($despesa->descricao, 40) }}
                                     </td>
+                                    
+                                    {{-- Valor Formatado --}}
+                                    <td class="text-right text-danger font-weight-bold">
+                                        R$ {{ number_format($despesa->valor, 2, ',', '.') }}
+                                    </td>
+                                    
+                                    {{-- Ações --}}
                                     <td>
-                                        {{-- Botão Editar --}}
-                                        <a href="{{ route('despesas.edit', $despesa->id) }}" class="btn btn-xs btn-info" title="Editar">
+                                        <a href="{{ route('despesas.edit', $despesa->id) }}" class="btn btn-xs btn-default" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         
-                                        {{-- Botão Excluir (Usando formulário para método DELETE) --}}
+                                        {{-- Botão Excluir --}}
                                         <form action="{{ route('despesas.destroy', $despesa->id) }}" method="POST" style="display: inline-block;">
                                             @csrf
                                             @method('DELETE')
@@ -90,7 +108,7 @@
             {{-- Rodapé do Card com Paginação --}}
             @if($despesas->lastPage() > 1)
                 <div class="card-footer clearfix">
-                    {{ $despesas->links('vendor.pagination.bootstrap-4') }}
+                    {{ $despesas->links() }} 
                 </div>
             @endif
         </div>
@@ -98,8 +116,3 @@
 </div>
 
 @endsection
-
-{{-- Adiciona o uso do Carbon e String Helper --}}
-@php
-use Illuminate\Support\Str;
-@endphp
