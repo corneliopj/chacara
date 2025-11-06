@@ -185,9 +185,49 @@
                     <span class="badge badge-danger">Total Custeio: R$ {{ number_format($custeio_total, 2, ',', '.') }}</span>
                 </div>
             </div>
+            
+            {{-- 🚨 CORREÇÃO: ADICIONANDO A TABELA DE HISTÓRICO 🚨 --}}
             <div class="card-body p-0">
-                {{-- Listagem de despesas existentes (semelhante ao código anterior) --}}
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%">Data</th>
+                            <th style="width: 15%">Categoria</th>
+                            <th>Descrição</th>
+                            <th style="width: 15%" class="text-right">Valor (R$)</th>
+                            <th style="width: 5%">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($cultura->despesas->sortByDesc('data') as $despesa)
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($despesa->data)->format('d/m/Y') }}</td>
+                                <td>{{ $despesa->categoria }}</td>
+                                <td>{{ $despesa->descricao }}</td>
+                                <td class="text-right text-danger font-weight-bold">R$ {{ number_format($despesa->valor, 2, ',', '.') }}</td>
+                                <td>
+                                    {{-- Botões de Ação (Editar e Excluir) --}}
+                                    <a href="{{ route('despesas.edit', $despesa->id) }}" class="btn btn-xs btn-default" title="Editar Despesa"><i class="fas fa-edit"></i></a>
+                                    
+                                    <form action="{{ route('despesas.destroy', $despesa->id) }}" method="POST" style="display: inline-block;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-xs btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta despesa?')" title="Excluir Despesa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center">Nenhuma despesa registrada para esta cultura.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+            {{-- FIM DA CORREÇÃO --}}
+            
         </div>
     </div>
 </div>
