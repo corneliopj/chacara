@@ -1,5 +1,3 @@
-// app/Http/Controllers/ReceitaController.php
-
 <?php
 
 namespace App\Http\Controllers;
