@@ -13,18 +13,18 @@ class Receita extends Model
 
     protected $fillable = [
         'cultura_id',
-        'data_venda',              // ⬅️ CORRIGIDO: Nome usado no Controller
+        'data_venda',
         'descricao',
-        'quantidade_vendida',      // ⬅️ ADICIONADO: Campo da validação
-        'unidade_medida',          // ⬅️ ADICIONADO: Campo da validação
-        'valor_total',             // ⬅️ CORRIGIDO: Nome usado no Controller
-        'observacoes',             // ⬅️ ADICIONADO: Campo da validação (nullable)
+        'quantidade_vendida',
+        'unidade_medida',
+        'valor', // ⬅️ CORREÇÃO: Voltando para 'valor'
+        'observacoes',
     ];
 
     protected $casts = [
-        'data_venda' => 'date',    // ⬅️ CORRIGIDO: Nome do campo de data
-        'valor_total' => 'float',  // ⬅️ CORRIGIDO: Nome do campo de valor
-        'quantidade_vendida' => 'float', // ADICIONADO: Cast para garantir float
+        'data_venda' => 'date',
+        'valor' => 'float', // ⬅️ CORREÇÃO: Voltando para 'valor'
+        'quantidade_vendida' => 'float', 
     ];
 
     /**

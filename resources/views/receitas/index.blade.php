@@ -73,8 +73,8 @@
                                         {{ number_format($receita->quantidade_vendida, 2, ',', '.') }} {{ $receita->unidade_medida }}
                                     </td>
                                     
-                                    <td class="text-right text-success font-weight-bold">
-                                        R$ {{ number_format($receita->valor_total, 2, ',', '.') }}
+                                  <td class="text-right text-success font-weight-bold">
+                                        R$ {{ number_format($receita->valor, 2, ',', '.') }}
                                     </td>
                                     
                                     <td>

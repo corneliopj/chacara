@@ -76,15 +76,14 @@
                             @enderror
                         </div>
 
-                        <div class="form-group col-md-4">
-                            <label for="valor_total">Valor Total (R$)</label>
-                            <input type="number" step="0.01" class="form-control @error('valor_total') is-invalid @enderror" id="valor_total" name="valor_total" 
-                                value="{{ old('valor_total') }}" required min="0.01">
-                            @error('valor_total')
+                      <div class="form-group col-md-4">
+                            <label for="valor">Valor Total (R$)</label>
+                            <input type="number" step="0.01" class="form-control @error('valor') is-invalid @enderror" id="valor" name="valor" 
+                                value="{{ old('valor') }}" required min="0.01">
+                            @error('valor')
                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                             @enderror
                         </div>
-                    </div>
                     
                     {{-- Descrição --}}
                     <div class="form-group">

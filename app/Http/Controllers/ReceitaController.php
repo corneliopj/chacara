@@ -45,7 +45,7 @@ class ReceitaController extends Controller
             'descricao' => 'required|string|max:255',
             'quantidade_vendida' => 'required|numeric|min:0.01',
             'unidade_medida' => 'required|string|max:50',
-            'valor_total' => 'required|numeric|min:0.01',
+            'valor' => 'required|numeric|min:0.01', // ⬅️ CORRIGIDO
             'observacoes' => 'nullable|string',
         ]);
         
@@ -79,7 +79,7 @@ class ReceitaController extends Controller
             'descricao' => 'required|string|max:255',
             'quantidade_vendida' => 'required|numeric|min:0.01',
             'unidade_medida' => 'required|string|max:50',
-            'valor_total' => 'required|numeric|min:0.01',
+            'valor' => 'required|numeric|min:0.01', // ⬅️ CORRIGIDO
             'observacoes' => 'nullable|string',
         ]);
         
