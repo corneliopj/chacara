@@ -25,14 +25,13 @@ class ReceitaController extends Controller
     public function create()
     {
         // Lista apenas culturas que podem gerar receita (Ativa, Em Colheita, Finalizada)
-        $culturas = Cultura::whereIn('status', ['Ativa', 'Em Colheita', 'Finalizada'])
+        $culturas = Cultura::whereIn('status', ['Ativa', 'Em Colheita', 'Finalizada'])      
                             ->orderBy('nome')
                             ->get(['id', 'nome']);
                             
-        // Unidades de Medida comuns para a venda
         $unidades = ['Kg', 'Unidade', 'Saco', 'Litro', 'Caixa'];
 
-        return view('receitas.create', compact('culturas', 'unidades'));
+        return view('receitas.create', compact('culturas', 'unidades')); // Variáveis passadas corretamente
     }
 
     /**
@@ -61,7 +60,7 @@ class ReceitaController extends Controller
      */
     public function edit(Receita $receita)
     {
-        $culturas = Cultura::whereIn('status', ['Ativa', 'Em Colheita', 'Finalizada'])
+       $culturas = Cultura::whereIn('status', ['Ativa', 'Em Colheita', 'Finalizada'])
                             ->orderBy('nome')
                             ->get(['id', 'nome']);
         $unidades = ['Kg', 'Unidade', 'Saco', 'Litro', 'Caixa'];

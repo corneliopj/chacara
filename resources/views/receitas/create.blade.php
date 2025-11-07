@@ -36,20 +36,20 @@
                             @enderror
                         </div>
 
-                        <div class="form-group col-md-6">
-                            <label for="cultura_id">Cultura de Origem</label>
-                            <select class="form-control @error('cultura_id') is-invalid @enderror" id="cultura_id" name="cultura_id" required>
-                                <option value="">-- Selecione a Cultura --</option>
-                                @foreach ($culturas as $cultura)
-                                    <option value="{{ $cultura->id }}" {{ old('cultura_id') == $cultura->id ? 'selected' : '' }}>
-                                        {{ $cultura->nome }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('cultura_id')
-                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                            @enderror
-                        </div>
+                            <div class="form-group col-md-6">
+                                    <label for="cultura_id">Cultura de Origem</label>
+            <select class="form-control @error('cultura_id') is-invalid @enderror" id="cultura_id" name="cultura_id" required>
+                <option value="">-- Selecione a Cultura --</option>
+                @foreach ($culturas as $cultura) // <-- O loop está aqui e é o ponto de sucesso
+                    <option value="{{ $cultura->id }}" {{ old('cultura_id') == $cultura->id ? 'selected' : '' }}>
+                        {{ $cultura->nome }}
+                    </option>
+                @endforeach
+            </select>
+            @error('cultura_id')
+                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+            @enderror
+        </div>
                     </div>
                     
                     {{-- SEGUNDA LINHA: Quantidade, Unidade e Valor Total --}}
