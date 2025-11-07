@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Receita;
-use App\Models\Cultura; // Necessário para listar as culturas
+use App\Models\Cultura; // Importação necessária para listar as culturas
 use Illuminate\Http\Request;
 
 class ReceitaController extends Controller
@@ -24,14 +24,13 @@ class ReceitaController extends Controller
      */
     public function create()
     {
-        // Lista apenas culturas que podem gerar receita (Ativa, Em Colheita, Finalizada)
-        $culturas = Cultura::whereIn('status', ['Ativa', 'Em Colheita', 'Finalizada'])      
-                            ->orderBy('nome')
-                            ->get(['id', 'nome']);
+        // Lista TODAS as culturas (independente do status) para garantir que apareçam no select.
+        // O campo agora é opcional, permitindo "Receita Geral".
+        $culturas = Cultura::orderBy('nome')->get(['id', 'nome']);
                             
         $unidades = ['Kg', 'Unidade', 'Saco', 'Litro', 'Caixa'];
 
-        return view('receitas.create', compact('culturas', 'unidades')); // Variáveis passadas corretamente
+        return view('receitas.create', compact('culturas', 'unidades'));
     }
 
     /**
@@ -40,12 +39,13 @@ class ReceitaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'cultura_id' => 'required|exists:culturas,id',
+            // CORREÇÃO: cultura_id agora é opcional (nullable) para permitir Receitas Gerais
+            'cultura_id' => 'nullable|exists:culturas,id',
             'data_venda' => 'required|date',
             'descricao' => 'required|string|max:255',
             'quantidade_vendida' => 'required|numeric|min:0.01',
             'unidade_medida' => 'required|string|max:50',
-            'valor' => 'required|numeric|min:0.01', // ⬅️ CORRIGIDO
+            'valor' => 'required|numeric|min:0.01',
             'observacoes' => 'nullable|string',
         ]);
         
@@ -60,9 +60,8 @@ class ReceitaController extends Controller
      */
     public function edit(Receita $receita)
     {
-       $culturas = Cultura::whereIn('status', ['Ativa', 'Em Colheita', 'Finalizada'])
-                            ->orderBy('nome')
-                            ->get(['id', 'nome']);
+        // Lista TODAS as culturas
+        $culturas = Cultura::orderBy('nome')->get(['id', 'nome']);
         $unidades = ['Kg', 'Unidade', 'Saco', 'Litro', 'Caixa'];
 
         return view('receitas.edit', compact('receita', 'culturas', 'unidades'));
@@ -74,12 +73,13 @@ class ReceitaController extends Controller
     public function update(Request $request, Receita $receita)
     {
         $request->validate([
-            'cultura_id' => 'required|exists:culturas,id',
+            // CORREÇÃO: cultura_id agora é opcional (nullable)
+            'cultura_id' => 'nullable|exists:culturas,id',
             'data_venda' => 'required|date',
             'descricao' => 'required|string|max:255',
             'quantidade_vendida' => 'required|numeric|min:0.01',
             'unidade_medida' => 'required|string|max:50',
-            'valor' => 'required|numeric|min:0.01', // ⬅️ CORRIGIDO
+            'valor' => 'required|numeric|min:0.01',
             'observacoes' => 'nullable|string',
         ]);
         

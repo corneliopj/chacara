@@ -1,5 +1,3 @@
-// resources/views/receitas/create.blade.php
-
 @extends('layout.master')
 
 @section('title', 'Nova Receita')
@@ -18,6 +16,7 @@
                 @csrf
                 <div class="card-body">
                     
+                    {{-- Mensagens de erro de validação --}}
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <h5><i class="icon fas fa-ban"></i> Erro de Validação!</h5>
@@ -36,20 +35,23 @@
                             @enderror
                         </div>
 
-                            <div class="form-group col-md-6">
-                                    <label for="cultura_id">Cultura de Origem</label>
-            <select class="form-control @error('cultura_id') is-invalid @enderror" id="cultura_id" name="cultura_id" required>
-                <option value="">-- Selecione a Cultura --</option>
-                @foreach ($culturas as $cultura) // <-- O loop está aqui e é o ponto de sucesso
-                    <option value="{{ $cultura->id }}" {{ old('cultura_id') == $cultura->id ? 'selected' : '' }}>
-                        {{ $cultura->nome }}
-                    </option>
-                @endforeach
-            </select>
-            @error('cultura_id')
-                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-            @enderror
-        </div>
+                        {{-- CAMPO CORRIGIDO: Cultura de Origem (agora opcional) --}}
+                        <div class="form-group col-md-6">
+                            <label for="cultura_id">Cultura de Origem (Opcional)</label>
+                            {{-- Atributo 'required' REMOVIDO --}}
+                            <select class="form-control @error('cultura_id') is-invalid @enderror" id="cultura_id" name="cultura_id">
+                                {{-- Opção para Receitas Gerais --}}
+                                <option value="">-- Receita Geral (Sem Cultura) --</option>
+                                @foreach ($culturas as $cultura)
+                                    <option value="{{ $cultura->id }}" {{ old('cultura_id') == $cultura->id ? 'selected' : '' }}>
+                                        {{ $cultura->nome }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('cultura_id')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
+                        </div>
                     </div>
                     
                     {{-- SEGUNDA LINHA: Quantidade, Unidade e Valor Total --}}
@@ -76,7 +78,8 @@
                             @enderror
                         </div>
 
-                      <div class="form-group col-md-4">
+                        {{-- CAMPO CORRIGIDO: 'name' agora é 'valor' --}}
+                        <div class="form-group col-md-4">
                             <label for="valor">Valor Total (R$)</label>
                             <input type="number" step="0.01" class="form-control @error('valor') is-invalid @enderror" id="valor" name="valor" 
                                 value="{{ old('valor') }}" required min="0.01">
@@ -84,6 +87,7 @@
                                 <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                             @enderror
                         </div>
+                    </div>
                     
                     {{-- Descrição --}}
                     <div class="form-group">
@@ -125,7 +129,7 @@
                 As receitas são essenciais para calcular o lucro líquido da sua propriedade.
             </p>
             <p>
-                Certifique-se de associar cada venda à **Cultura** correta para que o resultado financeiro seja apurado de forma precisa.
+                Deixe o campo **Cultura de Origem** como **Receita Geral** para receitas que não estão diretamente ligadas a uma cultura específica (Ex: Doações, Venda de Ativos).
             </p>
         </div>
     </div>
