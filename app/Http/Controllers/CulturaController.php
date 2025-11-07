@@ -58,7 +58,6 @@ class CulturaController extends Controller
      * Carrega a Cultura e suas Despesas para edição e detalhes.
      */
 
-    public function edit(Cultura $cultura)
   public function edit(Cultura $cultura)
 {
     // 1. Otimiza o carregamento dos dados financeiros para o Extrato
