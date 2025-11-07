@@ -59,18 +59,23 @@ class CulturaController extends Controller
      */
 
     public function edit(Cultura $cultura)
-    {
+  public function edit(Cultura $cultura)
+{
     // 1. Otimiza o carregamento dos dados financeiros para o Extrato
     $cultura->load(['despesas', 'receitas']); 
 
-    // 2. Unidades de Medida para o formulário de Receita
+    // 2. Variáveis necessárias para os formulários de lançamento
     $unidades = ['Kg', 'Unidade', 'Saco', 'Litro', 'Caixa'];
+    
+    // Categorias para o formulário de Despesa
+    $categorias = [ 
+        'Insumo', 'Semente', 'Mão-de-Obra', 'Combustível', 'Eletricidade', 
+        'Equipamento', 'Manutenção', 'Outro Geral'
+    ]; 
 
-    // 3. Categorias para o formulário de Despesa (Se você tiver um no edit.blade.php)
-    // Caso contrário, apenas remova o filtro do edit.blade.php se o formulário for genérico
-
-    return view('culturas.edit', compact('cultura', 'unidades')); // Passando 'unidades'
-    }
+    // 3. Passando todas as variáveis necessárias para a view
+    return view('culturas.edit', compact('cultura', 'unidades', 'categorias')); 
+}
 
     /**
      * Atualiza a cultura no banco de dados.

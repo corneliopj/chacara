@@ -9,12 +9,15 @@
     use Carbon\Carbon;
     use Illuminate\Support\Str;
 
+    // --- BLOCO DE CÁLCULO E PREPARAÇÃO DE DADOS ---
+    
     // 1. CÁLCULO DO RESUMO FINANCEIRO
     $custeio_total = $cultura->despesas->sum('valor');
     $receita_total = $cultura->receitas->sum('valor');
     $resultado_liquido = $receita_total - $custeio_total;
 
     // 2. CRIAÇÃO DO EXTRATO COMBINADO
+    
     // Mapeia Despesas
     $despesas_formatadas = $cultura->despesas->map(function($item) {
         return [
@@ -32,6 +35,7 @@
     $receitas_formatadas = $cultura->receitas->map(function($item) {
         return [
             'data' => $item->data_venda, 
+            // Combina quantidade e unidade na descrição para o extrato
             'descricao' => $item->descricao . ' (' . number_format($item->quantidade_vendida, 2, ',', '.') . ' ' . $item->unidade_medida . ')',
             'valor' => $item->valor, // Receita é valor positivo
             'tipo' => 'Receita',
@@ -44,15 +48,16 @@
     // Combina e Ordena pela data (mais recente primeiro)
     $extrato = $despesas_formatadas->merge($receitas_formatadas)->sortByDesc('data');
 
-    // Lista de unidades (necessária para o formulário de Receita)
-    // Assume-se que $unidades foi passado do controller (e.g., ['Kg', 'Unidade', 'Saco', 'Litro', 'Caixa'])
+    // Assumimos que $unidades e $categorias estão disponíveis
     $unidades = $unidades ?? ['Kg', 'Unidade', 'Saco', 'Litro', 'Caixa'];
+    $categorias = $categorias ?? ['Insumo', 'Semente', 'Mão-de-Obra', 'Combustível', 'Eletricidade', 'Equipamento', 'Manutenção', 'Outro Geral'];
 
 @endphp
 
+{{-- PRIMEIRA LINHA: DETALHES E RESUMO --}}
 <div class="row">
     
-    {{-- COLUNA ESQUERDA: Informações Principais da Cultura --}}
+    {{-- COLUNA ESQUERDA (6): Detalhes da Cultura (Formulário de Edição) --}}
     <div class="col-md-6">
         <div class="card card-info card-outline">
             <div class="card-header">
@@ -60,15 +65,14 @@
             </div>
             
             <div class="card-body">
-                {{-- Formulário de Edição da Cultura (Mantido como estava) --}}
                 <form action="{{ route('culturas.update', $cultura->id) }}" method="POST">
                     @csrf
                     @method('PUT')
                     
-                    {{-- Campos de Edição da Cultura (Mantenha aqui os campos originais) --}}
+                    {{-- Campos de Edição da Cultura --}}
                     <div class="form-group">
                         <label for="nome">Nome da Cultura:</label>
-                        <input type="text" name="nome" id="nome" class="form-control @error('nome') is-invalid @enderror" value="{{ old('nome', $cultura->nome) }}" required>
+                        <input type="text" name="nome" id="nome" class="form-control form-control-sm @error('nome') is-invalid @enderror" value="{{ old('nome', $cultura->nome) }}" required>
                         @error('nome')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
@@ -76,7 +80,7 @@
                     
                     <div class="form-group">
                         <label for="area_m2">Área (m²):</label>
-                        <input type="number" step="0.01" name="area_m2" id="area_m2" class="form-control @error('area_m2') is-invalid @enderror" value="{{ old('area_m2', $cultura->area_m2) }}" required>
+                        <input type="number" step="0.01" name="area_m2" id="area_m2" class="form-control form-control-sm @error('area_m2') is-invalid @enderror" value="{{ old('area_m2', $cultura->area_m2) }}" required>
                         @error('area_m2')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
@@ -84,7 +88,7 @@
                     
                     <div class="form-group">
                         <label for="status">Status:</label>
-                        <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
+                        <select name="status" id="status" class="form-control form-control-sm @error('status') is-invalid @enderror" required>
                             @foreach (['Em Planejamento', 'Ativa', 'Em Colheita', 'Finalizada', 'Cancelada'] as $status)
                                 <option value="{{ $status }}" {{ old('status', $cultura->status) == $status ? 'selected' : '' }}>{{ $status }}</option>
                             @endforeach
@@ -96,23 +100,21 @@
 
                     <div class="form-group">
                         <label for="observacoes">Observações (Opcional):</label>
-                        <textarea name="observacoes" id="observacoes" class="form-control @error('observacoes') is-invalid @enderror" rows="3">{{ old('observacoes', $cultura->observacoes) }}</textarea>
+                        <textarea name="observacoes" id="observacoes" class="form-control form-control-sm @error('observacoes') is-invalid @enderror" rows="2">{{ old('observacoes', $cultura->observacoes) }}</textarea>
                         @error('observacoes')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    <button type="submit" class="btn btn-info mt-3"><i class="fas fa-save mr-1"></i> Salvar Alterações</button>
-                    <a href="{{ route('culturas.index') }}" class="btn btn-secondary mt-3 ml-2"><i class="fas fa-times-circle mr-1"></i> Voltar</a>
+                    <button type="submit" class="btn btn-info btn-sm mt-2"><i class="fas fa-save mr-1"></i> Salvar Alterações</button>
+                    <a href="{{ route('culturas.index') }}" class="btn btn-secondary btn-sm mt-2 ml-2"><i class="fas fa-times-circle mr-1"></i> Voltar</a>
                 </form>
             </div>
         </div>
     </div>
     
-    {{-- COLUNA DIREITA --}}
+    {{-- COLUNA DIREITA (6): Resumo Financeiro --}}
     <div class="col-md-6">
-        
-        {{-- CARD 1: RESUMO FINANCEIRO (NOVO) --}}
         <div class="card card-warning card-outline">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Resumo Financeiro da Cultura</h3>
@@ -134,8 +136,14 @@
                 </div>
             </div>
         </div>
-        
-        {{-- CARD 2: FORMULÁRIO DE NOVA RECEITA --}}
+    </div>
+</div>
+
+{{-- SEGUNDA LINHA: FORMULÁRIOS DE LANÇAMENTO --}}
+<div class="row">
+    
+    {{-- COLUNA ESQUERDA (6): Lançar Nova Receita de Venda --}}
+    <div class="col-md-6">
         <div class="card card-success card-outline">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-plus mr-1"></i> Lançar Nova Receita de Venda</h3>
@@ -143,7 +151,6 @@
             
             <form action="{{ route('receitas.store') }}" method="POST">
                 @csrf
-                {{-- Campo oculto para vincular à Cultura atual --}}
                 <input type="hidden" name="cultura_id" value="{{ $cultura->id }}"> 
                 
                 <div class="card-body">
@@ -155,8 +162,8 @@
                             <input type="date" class="form-control form-control-sm @error('data_venda') is-invalid @enderror" id="data_venda" name="data_venda" value="{{ old('data_venda', now()->format('Y-m-d')) }}" required>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="valor">Valor Total (R$)</label>
-                            <input type="number" step="0.01" class="form-control form-control-sm @error('valor') is-invalid @enderror" id="valor" name="valor" value="{{ old('valor') }}" required min="0.01">
+                            <label for="valor_receita">Valor Total (R$)</label>
+                            <input type="number" step="0.01" class="form-control form-control-sm @error('valor') is-invalid @enderror" id="valor_receita" name="valor" value="{{ old('valor') }}" required min="0.01">
                         </div>
                     </div>
 
@@ -178,8 +185,8 @@
 
                     {{-- Descrição --}}
                     <div class="form-group">
-                        <label for="descricao">Descrição da Venda (Comprador, Local, etc.)</label>
-                        <input type="text" class="form-control form-control-sm @error('descricao') is-invalid @enderror" id="descricao" name="descricao" value="{{ old('descricao') }}" required>
+                        <label for="descricao_receita">Descrição da Venda</label>
+                        <input type="text" class="form-control form-control-sm @error('descricao') is-invalid @enderror" id="descricao_receita" name="descricao" value="{{ old('descricao') }}" required>
                     </div>
 
                 </div>
@@ -191,11 +198,64 @@
                 </div>
             </form>
         </div>
-        
     </div>
+    
+    {{-- COLUNA DIREITA (6): Lançar Nova Despesa (Reintroduzido) --}}
+    <div class="col-md-6">
+        <div class="card card-danger card-outline">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-minus mr-1"></i> Lançar Nova Despesa</h3>
+            </div>
+            
+            <form action="{{ route('despesas.store') }}" method="POST">
+                @csrf
+                {{-- Campo oculto para vincular automaticamente a Despesa à Cultura atual --}}
+                <input type="hidden" name="cultura_id" value="{{ $cultura->id }}"> 
+                
+                <div class="card-body">
+                    
+                    {{-- Data do Gasto e Valor --}}
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="data_despesa">Data do Gasto</label>
+                            <input type="date" class="form-control form-control-sm @error('data') is-invalid @enderror" id="data_despesa" name="data" value="{{ old('data', now()->format('Y-m-d')) }}" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="valor_despesa">Valor (R$)</label>
+                            <input type="number" step="0.01" class="form-control form-control-sm @error('valor') is-invalid @enderror" id="valor_despesa" name="valor" value="{{ old('valor') }}" required min="0.01">
+                        </div>
+                    </div>
+
+                    {{-- Categoria --}}
+                    <div class="form-group">
+                        <label for="categoria">Categoria</label>
+                        <select class="form-control form-control-sm @error('categoria') is-invalid @enderror" id="categoria" name="categoria" required>
+                            <option value="">-- Selecione a Categoria --</option>
+                            @foreach ($categorias as $categoria)
+                                <option value="{{ $categoria }}" {{ old('categoria') == $categoria ? 'selected' : '' }}>{{ $categoria }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Descrição --}}
+                    <div class="form-group">
+                        <label for="descricao_despesa">Descrição do Gasto (Insumo, Serviço, etc.)</label>
+                        <input type="text" class="form-control form-control-sm @error('descricao') is-invalid @enderror" id="descricao_despesa" name="descricao" value="{{ old('descricao') }}" required>
+                    </div>
+                </div>
+                
+                <div class="card-footer text-right">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        <i class="fas fa-hand-holding-usd mr-1"></i> Registrar Despesa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
-{{-- LINHA INFERIOR: EXTRATO DE LANÇAMENTOS (UNIFICADO) --}}
+{{-- TERCEIRA LINHA: EXTRATO DE LANÇAMENTOS (UNIFICADO) --}}
 <div class="row">
     <div class="col-12">
         <div class="card card-primary card-outline">
@@ -229,8 +289,8 @@
                                         <span class="badge badge-{{ $item['tipo'] == 'Receita' ? 'success' : 'danger' }}">{{ $item['tipo'] }}</span>
                                     </td>
                                     <td>{{ $item['categoria'] }}</td>
-                                    <td title="{{ $item['descricao'] }}">
-                                        {{ Str::limit($item['descricao'], 60) }}
+                                    <td title="{{ strip_tags($item['descricao']) }}">
+                                        {{ Str::limit(strip_tags($item['descricao']), 60) }}
                                     </td>
                                     <td class="text-right font-weight-bold text-{{ $item['valor'] >= 0 ? 'success' : 'danger' }}">
                                         R$ {{ number_format(abs($item['valor']), 2, ',', '.') }}
