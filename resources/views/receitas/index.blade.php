@@ -1,5 +1,3 @@
-// resources/views/receitas/index.blade.php
-
 @extends('layout.master')
 
 @section('title', 'Receitas Registradas')
@@ -59,10 +57,15 @@
                                 <tr>
                                     <td>{{ Carbon::parse($receita->data_venda)->format('d/m/Y') }}</td> 
                                     
+                                    {{-- CORREÇÃO AQUI: Verifica se a Cultura existe antes de tentar ler suas propriedades --}}
                                     <td>
-                                        <a href="{{ route('culturas.edit', $receita->cultura->id) }}" class="text-info font-weight-bold">
-                                            {{ $receita->cultura->nome }}
-                                        </a>
+                                        @if ($receita->cultura)
+                                            <a href="{{ route('culturas.edit', $receita->cultura->id) }}" class="text-info font-weight-bold">
+                                                {{ $receita->cultura->nome }}
+                                            </a>
+                                        @else
+                                            <span class="badge badge-secondary">Receita Geral</span>
+                                        @endif
                                     </td>
                                     
                                     <td title="{{ $receita->descricao }}">
@@ -73,8 +76,8 @@
                                         {{ number_format($receita->quantidade_vendida, 2, ',', '.') }} {{ $receita->unidade_medida }}
                                     </td>
                                     
-                                  <td class="text-right text-success font-weight-bold">
-                                        R$ {{ number_format($receita->valor, 2, ',', '.') }}
+                                    <td class="text-right text-success font-weight-bold">
+                                        R$ {{ number_format($receita->valor, 2, ',', '.') }} {{-- Corrigido para 'valor' --}}
                                     </td>
                                     
                                     <td>
