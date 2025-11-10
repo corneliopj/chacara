@@ -148,7 +148,7 @@
             </div>
         </div>
         
-        {{-- CARD 2 NA DIREITA: Cota de Contribuição dos Sócios (AGORA COMPACTO) --}}
+        {{-- CARD 2 NA DIREITA: Cota de Contribuição dos Sócios (AGORA COMPACTO E EM DUAS COLUNAS) --}}
         <div class="card card-warning card-outline">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-percent mr-1"></i> Cota de Contribuição dos Sócios</h3>
@@ -168,31 +168,35 @@
                         </div>
                     @endif
                     
-                    @foreach ($socios as $socio)
-                        {{-- OTIMIZADO: Removido border-bottom e py-2, ajustado colunas e espaçamento vertical --}}
-                        <div class="form-group row mb-2"> 
-                            <label for="cotas_{{ $socio->id }}" class="col-sm-5 col-form-label pt-0 pb-0">{{ $socio->nome }}:</label>
-                            <div class="col-sm-7">
-                                {{-- OTIMIZADO: Adicionado input-group-sm para inputs menores --}}
-                                <div class="input-group input-group-sm"> 
-                                    <input type="number" step="0.01" min="0" max="100"
-                                        name="cotas[{{ $socio->id }}][percentual_cota]" 
-                                        id="cotas_{{ $socio->id }}" 
-                                        class="form-control text-right @error('cotas.' . $socio->id . '.percentual_cota') is-invalid @enderror" 
-                                        value="{{ old('cotas.' . $socio->id . '.percentual_cota', $cotas_atuais[$socio->id] ?? 0) }}" 
-                                        required>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">%</span>
+                    {{-- NOVO: Estrutura de Duas Colunas Internas para os Sócios --}}
+                    <div class="row">
+                        @foreach ($socios as $socio)
+                            <div class="col-md-6"> {{-- Cada sócio ocupa metade da largura --}}
+                                {{-- O form-group interno mantém label e input na mesma linha --}}
+                                <div class="form-group row mb-2"> 
+                                    <label for="cotas_{{ $socio->id }}" class="col-sm-5 col-form-label pt-0 pb-0">{{ $socio->nome }}:</label>
+                                    <div class="col-sm-7">
+                                        <div class="input-group input-group-sm"> 
+                                            <input type="number" step="0.01" min="0" max="100"
+                                                name="cotas[{{ $socio->id }}][percentual_cota]" 
+                                                id="cotas_{{ $socio->id }}" 
+                                                class="form-control text-right @error('cotas.' . $socio->id . '.percentual_cota') is-invalid @enderror" 
+                                                value="{{ old('cotas.' . $socio->id . '.percentual_cota', $cotas_atuais[$socio->id] ?? 0) }}" 
+                                                required>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                            @error('cotas.' . $socio->id . '.percentual_cota')
+                                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                            @enderror
+                                        </div>
                                     </div>
-                                    @error('cotas.' . $socio->id . '.percentual_cota')
-                                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                                    @enderror
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div> {{-- Fim da linha de sócios --}}
                     
-                    {{-- OTIMIZADO: Redução de margem superior --}}
+                    {{-- OTIMIZADO: Redução de margem superior. Mantido fora do loop. --}}
                     <div class="row mt-2"> 
                         <div class="col-6">
                             <p class="text-right font-weight-bold mb-0">Total Atual:</p>
