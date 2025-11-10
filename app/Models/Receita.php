@@ -18,6 +18,7 @@ class Receita extends Model
         'quantidade_vendida',
         'unidade_medida',
         'valor', // ⬅️ CORREÇÃO: Voltando para 'valor'
+        'socio_depositante_id',
         'observacoes',
     ];
 
@@ -33,5 +34,9 @@ class Receita extends Model
     public function cultura()
     {
         return $this->belongsTo(Cultura::class, 'cultura_id');
+    }
+    public function socioDepositante()
+    {
+        return $this->belongsTo(Socio::class, 'socio_depositante_id');
     }
 }

@@ -35,13 +35,27 @@
     
     // Mapeia Receitas
     $receitas_formatadas = $cultura->receitas->map(function($item) {
+        // Verifica se é um Aporte (tem sócio depositante) ou uma Venda (não tem)
+        // Assume que o modelo Receita tem um relacionamento socioDepositante
+        $tipo_lancamento = $item->socioDepositante ? 'Aporte (Sócio)' : 'Receita (Venda)';
+        $descricao_base = $item->descricao;
+        
+        if ($item->socioDepositante) {
+            // Se for Aporte, adiciona quem depositou na descrição
+            $descricao_detalhada = $descricao_base . " [Depositante: " . $item->socioDepositante->nome . "]";
+            $categoria = 'Aporte';
+        } else {
+            // Se for Venda, adiciona quantidade e unidade
+            $descricao_detalhada = $descricao_base . ' (' . number_format($item->quantidade_vendida, 2, ',', '.') . ' ' . $item->unidade_medida . ')';
+            $categoria = 'Venda';
+        }
+        
         return [
             'data' => $item->data_venda, 
-            // Combina quantidade e unidade na descrição para o extrato
-            'descricao' => $item->descricao . ' (' . number_format($item->quantidade_vendida, 2, ',', '.') . ' ' . $item->unidade_medida . ')',
-            'valor' => $item->valor, // Receita é valor positivo
-            'tipo' => 'Receita',
-            'categoria' => 'Venda',
+            'descricao' => $descricao_detalhada,
+            'valor' => $item->valor, // Receita/Aporte é valor positivo
+            'tipo' => $tipo_lancamento,
+            'categoria' => $categoria,
             'link_edit' => route('receitas.edit', $item->id),
             'link_destroy' => route('receitas.destroy', $item->id),
         ];
@@ -148,7 +162,7 @@
             </div>
         </div>
         
-        {{-- CARD 2 NA DIREITA: Cota de Contribuição dos Sócios (AGORA COMPACTO E EM DUAS COLUNAS) --}}
+        {{-- CARD 2 NA DIREITA: Cota de Contribuição dos Sócios (COMPACTO E EM DUAS COLUNAS) --}}
         <div class="card card-warning card-outline">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-percent mr-1"></i> Cota de Contribuição dos Sócios</h3>
@@ -168,7 +182,7 @@
                         </div>
                     @endif
                     
-                    {{-- NOVO: Estrutura de Duas Colunas Internas para os Sócios --}}
+                    {{-- Estrutura de Duas Colunas Internas para os Sócios --}}
                     <div class="row">
                         @foreach ($socios as $socio)
                             <div class="col-md-6"> {{-- Cada sócio ocupa metade da largura --}}
@@ -196,7 +210,7 @@
                         @endforeach
                     </div> {{-- Fim da linha de sócios --}}
                     
-                    {{-- OTIMIZADO: Redução de margem superior. Mantido fora do loop. --}}
+                    {{-- Total Atual --}}
                     <div class="row mt-2"> 
                         <div class="col-6">
                             <p class="text-right font-weight-bold mb-0">Total Atual:</p>
@@ -211,7 +225,7 @@
                 </div>
                 
                 <div class="card-footer">
-                    {{-- OTIMIZADO: Botão menor (btn-sm) --}}
+                    {{-- Botão menor (btn-sm) --}}
                     <button type="submit" class="btn btn-warning btn-sm float-right">
                         <i class="fas fa-sync-alt mr-1"></i> Atualizar Cotas
                     </button>
@@ -227,11 +241,11 @@
 {{-- SEGUNDA LINHA: FORMULÁRIOS DE LANÇAMENTO --}}
 <div class="row">
     
-    {{-- COLUNA ESQUERDA (6): Lançar Nova Receita de Venda --}}
+    {{-- COLUNA ESQUERDA (6): Lançar Nova Receita de Venda/Aporte (ATUALIZADO) --}}
     <div class="col-md-6">
         <div class="card card-success card-outline">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-plus mr-1"></i> Lançar Nova Receita de Venda</h3>
+                <h3 class="card-title"><i class="fas fa-plus mr-1"></i> Lançar Nova Receita de Venda/Aporte</h3>
             </div>
             
             <form action="{{ route('receitas.store') }}" method="POST">
@@ -243,24 +257,26 @@
                     {{-- Data da Venda e Valor --}}
                     <div class="row">
                         <div class="form-group col-md-6">
-                            <label for="data_venda">Data da Venda</label>
+                            <label for="data_venda">Data da Venda/Aporte</label>
                             <input type="date" class="form-control form-control-sm @error('data_venda') is-invalid @enderror" id="data_venda" name="data_venda" value="{{ old('data_venda', now()->format('Y-m-d')) }}" required>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="valor_receita">Valor Total (R$)</label>
+                            <label for="valor_receita">Valor (R$)</label>
                             <input type="number" step="0.01" class="form-control form-control-sm @error('valor') is-invalid @enderror" id="valor_receita" name="valor" value="{{ old('valor') }}" required min="0.01">
                         </div>
                     </div>
 
-                    {{-- Quantidade e Unidade --}}
+                    {{-- Quantidade e Unidade (Opcionais para Aporte) --}}
                     <div class="row">
                          <div class="form-group col-md-6">
-                            <label for="quantidade_vendida">Quantidade</label>
-                            <input type="number" step="0.01" class="form-control form-control-sm @error('quantidade_vendida') is-invalid @enderror" id="quantidade_vendida" name="quantidade_vendida" value="{{ old('quantidade_vendida') }}" required min="0.01">
+                            <label for="quantidade_vendida">Quantidade (Venda)</label>
+                            {{-- Tornamos opcional, se for aporte, o valor é 0 ou nulo --}}
+                            <input type="number" step="0.01" class="form-control form-control-sm @error('quantidade_vendida') is-invalid @enderror" id="quantidade_vendida" name="quantidade_vendida" value="{{ old('quantidade_vendida') }}" min="0"> 
                         </div>
                         <div class="form-group col-md-6">
                             <label for="unidade_medida">Unidade</label>
-                            <select class="form-control form-control-sm @error('unidade_medida') is-invalid @enderror" id="unidade_medida" name="unidade_medida" required>
+                            <select class="form-control form-control-sm @error('unidade_medida') is-invalid @enderror" id="unidade_medida" name="unidade_medida">
+                                <option value="">-- Selecione (Se for Venda) --</option>
                                 @foreach ($unidades as $unidade)
                                     <option value="{{ $unidade }}" {{ old('unidade_medida') == $unidade ? 'selected' : '' }}>{{ $unidade }}</option>
                                 @endforeach
@@ -270,15 +286,33 @@
 
                     {{-- Descrição --}}
                     <div class="form-group">
-                        <label for="descricao_receita">Descrição da Venda</label>
-                        <input type="text" class="form-control form-control-sm @error('descricao') is-invalid @enderror" id="descricao_receita" name="descricao" value="{{ old('descricao') }}" required>
+                        <label for="descricao_receita">Descrição</label>
+                        <input type="text" class="form-control form-control-sm @error('descricao') is-invalid @enderror" id="descricao_receita" name="descricao" value="{{ old('descricao') }}" placeholder="Ex: Venda de Soja, ou: Aporte para custeio" required>
+                    </div>
+
+                    {{-- NOVO CAMPO: SÓCIO DEPOSITANTE --}}
+                    <div class="form-group">
+                        <label for="socio_depositante_id">Sócio Depositante (Opcional - Para Aportes)</label>
+                        <select class="form-control form-control-sm @error('socio_depositante_id') is-invalid @enderror" 
+                                name="socio_depositante_id" 
+                                id="socio_depositante_id">
+                            <option value="">-- N/A (Se for Venda Normal) --</option>
+                            @foreach ($socios as $socio)
+                                <option value="{{ $socio->id }}" {{ old('socio_depositante_id') == $socio->id ? 'selected' : '' }}>
+                                    {{ $socio->nome }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('socio_depositante_id')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
                     </div>
 
                 </div>
                 
                 <div class="card-footer text-right">
                     <button type="submit" class="btn btn-sm btn-success">
-                        <i class="fas fa-cash-register mr-1"></i> Registrar Receita
+                        <i class="fas fa-cash-register mr-1"></i> Registrar Receita/Aporte
                     </button>
                 </div>
             </form>
@@ -391,7 +425,7 @@
                                 <tr>
                                     <td>{{ Carbon::parse($item['data'])->format('d/m/Y') }}</td> 
                                     <td>
-                                        <span class="badge badge-{{ $item['tipo'] == 'Receita' ? 'success' : 'danger' }}">{{ $item['tipo'] }}</span>
+                                        <span class="badge badge-{{ $item['tipo'] == 'Despesa' ? 'danger' : 'success' }}">{{ $item['tipo'] }}</span>
                                     </td>
                                     <td>{{ $item['categoria'] }}</td>
                                     <td title="{{ strip_tags($item['descricao']) }}">

@@ -47,8 +47,11 @@ class ReceitaController extends Controller
             'unidade_medida' => 'required|string|max:50',
             'valor' => 'required|numeric|min:0.01',
             'observacoes' => 'nullable|string',
+            'socio_depositante_id' => 'nullable|exists:socios,id',
         ]);
-        
+        if (empty($request->quantidade_vendida) || $request->quantidade_vendida == 0) {
+            $request->merge(['quantidade_vendida' => 0, 'unidade_medida' => null]);
+        }
         Receita::create($request->all());
 
         return redirect()->route('receitas.index')
