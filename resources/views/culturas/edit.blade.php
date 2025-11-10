@@ -20,9 +20,11 @@
     
     // Mapeia Despesas
     $despesas_formatadas = $cultura->despesas->map(function($item) {
+        // Inclui o nome do sócio pagador no extrato (novo)
+        $pago_por = $item->pagoPorSocio ? $item->pagoPorSocio->nome : 'N/A';
         return [
             'data' => $item->data,
-            'descricao' => $item->descricao,
+            'descricao' => $item->descricao . " [Pago por: $pago_por]", // Adicionando o sócio no extrato
             'valor' => $item->valor * -1, // Despesa é valor negativo
             'tipo' => 'Despesa',
             'categoria' => $item->categoria ?? 'N/A',
@@ -52,9 +54,13 @@
     $unidades = $unidades ?? ['Kg', 'Unidade', 'Saco', 'Litro', 'Caixa'];
     $categorias = $categorias ?? ['Insumo', 'Semente', 'Mão-de-Obra', 'Combustível', 'Eletricidade', 'Equipamento', 'Manutenção', 'Outro Geral'];
 
+    // Variáveis necessárias para o card de Cotas
+    $cotas_atuais = $cultura->socios->pluck('pivot.percentual_cota', 'id')->toArray();
+    $total_atual = array_sum($cotas_atuais);
+
 @endphp
 
-{{-- PRIMEIRA LINHA: DETALHES E RESUMO --}}
+{{-- PRIMEIRA LINHA: DETALHES, RESUMO E COTAS --}}
 <div class="row">
     
     {{-- COLUNA ESQUERDA (6): Detalhes da Cultura (Formulário de Edição) --}}
@@ -72,7 +78,6 @@
                     {{-- Campos de Edição da Cultura --}}
                     <div class="form-group">
                         <label for="nome">Nome da Cultura:</label>
-                        {{-- ALTERADO: Removido form-control-sm --}}
                         <input type="text" name="nome" id="nome" class="form-control @error('nome') is-invalid @enderror" value="{{ old('nome', $cultura->nome) }}" required>
                         @error('nome')
                             <span class="invalid-feedback">{{ $message }}</span>
@@ -82,7 +87,6 @@
                     <div class="row">
                         <div class="form-group col-md-6">
                             <label for="area_m2">Área (m²):</label>
-                            {{-- ALTERADO: Removido form-control-sm --}}
                             <input type="number" step="0.01" name="area_m2" id="area_m2" class="form-control @error('area_m2') is-invalid @enderror" value="{{ old('area_m2', $cultura->area_m2) }}" required>
                             @error('area_m2')
                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -91,7 +95,6 @@
                         
                         <div class="form-group col-md-6">
                             <label for="status">Status:</label>
-                            {{-- ALTERADO: Removido form-control-sm --}}
                             <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
                                 @foreach (['Em Planejamento', 'Ativa', 'Em Colheita', 'Finalizada', 'Cancelada'] as $status)
                                     <option value="{{ $status }}" {{ old('status', $cultura->status) == $status ? 'selected' : '' }}>{{ $status }}</option>
@@ -105,7 +108,6 @@
 
                     <div class="form-group">
                         <label for="observacoes">Observações (Opcional):</label>
-                        {{-- ALTERADO: Removido form-control-sm --}}
                         <textarea name="observacoes" id="observacoes" class="form-control @error('observacoes') is-invalid @enderror" rows="2">{{ old('observacoes', $cultura->observacoes) }}</textarea>
                         @error('observacoes')
                             <span class="invalid-feedback">{{ $message }}</span>
@@ -117,12 +119,41 @@
                 </form>
             </div>
         </div>
+        
+    </div>
+    
+    {{-- COLUNA DIREITA (6): Resumo Financeiro e Cota de Contribuição --}}
+    <div class="col-md-6">
+        
+        {{-- NOVO CARD 1 NA DIREITA: Resumo Financeiro da Cultura --}}
+        <div class="card card-warning card-outline"> {{-- h-100 REMOVIDO --}}
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Resumo Financeiro da Cultura</h3>
+            </div>
+            <div class="card-body">
+                <div class="row w-100">
+                    <div class="col-4 text-center">
+                        <h5 class="text-success mb-1">Receita Total</h5>
+                        <p class="h4">R$ {{ number_format($receita_total, 2, ',', '.') }}</p>
+                    </div>
+                    <div class="col-4 text-center">
+                        <h5 class="text-danger mb-1">Custeio Total</h5>
+                        <p class="h4">R$ {{ number_format($custeio_total, 2, ',', '.') }}</p>
+                    </div>
+                    <div class="col-4 text-center">
+                        <h5 class="{{ $resultado_liquido >= 0 ? 'text-primary' : 'text-danger' }} mb-1">Resultado Líquido</h5>
+                        <p class="h4">R$ {{ number_format($resultado_liquido, 2, ',', '.') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {{-- NOVO CARD 2 NA DIREITA: Cota de Contribuição dos Sócios (MOVIDO) --}}
         <div class="card card-warning card-outline">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-percent mr-1"></i> Cota de Contribuição dos Sócios</h3>
             </div>
             
-            {{-- Importante: A rota cultura.update.socios deve ser criada --}}
             <form action="{{ route('culturas.update.socios', $cultura->id) }}" method="POST">
                 @csrf
                 @method('PUT')
@@ -136,11 +167,7 @@
                         </div>
                     @endif
                     
-                    @php 
-                        // Mapeia os sócios existentes na cultura (com percentual) para facilitar o acesso
-                        $cotas_atuais = $cultura->socios->pluck('pivot.percentual_cota', 'id')->toArray();
-                        $total_atual = array_sum($cotas_atuais);
-                    @endphp
+                    {{-- O bloco @php foi movido para o topo do arquivo para simplificação --}}
 
                     @foreach ($socios as $socio)
                         <div class="form-group row border-bottom py-2">
@@ -184,35 +211,13 @@
                 </div>
             </form>
         </div>
-    </div>
-    
-    {{-- COLUNA DIREITA (6): Resumo Financeiro --}}
-    <div class="col-md-6">
-        <div class="card card-warning card-outline h-100"> {{-- h-100 para esticar e alinhar --}}
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Resumo Financeiro da Cultura</h3>
-            </div>
-            <div class="card-body d-flex align-items-center justify-content-center">
-                <div class="row w-100">
-                    <div class="col-4 text-center">
-                        <h5 class="text-success mb-1">Receita Total</h5>
-                        <p class="h4">R$ {{ number_format($receita_total, 2, ',', '.') }}</p>
-                    </div>
-                    <div class="col-4 text-center">
-                        <h5 class="text-danger mb-1">Custeio Total</h5>
-                        <p class="h4">R$ {{ number_format($custeio_total, 2, ',', '.') }}</p>
-                    </div>
-                    <div class="col-4 text-center">
-                        <h5 class="{{ $resultado_liquido >= 0 ? 'text-primary' : 'text-danger' }} mb-1">Resultado Líquido</h5>
-                        <p class="h4">R$ {{ number_format($resultado_liquido, 2, ',', '.') }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
     </div>
 </div>
 
-{{-- SEGUNDA LINHA: FORMULÁRIOS DE LANÇAMENTO --}}
+---
+
+{{-- SEGUNDA LINHA: FORMULÁRIOS DE LANÇAMENTO (SEM ALTERAÇÃO DE LAYOUT) --}}
 <div class="row">
     
     {{-- COLUNA ESQUERDA (6): Lançar Nova Receita de Venda --}}
@@ -315,14 +320,15 @@
                         <input type="text" class="form-control form-control-sm @error('descricao') is-invalid @enderror" id="descricao_despesa" name="descricao" value="{{ old('descricao') }}" required>
                     </div>
                 </div>
+                
+                {{-- Campo Sócio Pagador (MANTIDO aqui, pois é parte do formulário de Despesa) --}}
                 <div class="form-group col-md-12">
-                    <label for="pago_por_socio_id">Sócio Pagador (para este Lote de Despesas):</label>
+                    <label for="pago_por_socio_id">Sócio Pagador:</label>
                     <select class="form-control @error('pago_por_socio_id') is-invalid @enderror" 
                             name="pago_por_socio_id" 
                             id="pago_por_socio_id" 
                             required>
                         <option value="">-- Selecione o Sócio Pagador --</option>
-                        {{-- $socios é carregado no CulturaController@edit --}}
                         @foreach ($socios as $socio)
                             <option value="{{ $socio->id }}" {{ old('pago_por_socio_id') == $socio->id ? 'selected' : '' }}>
                                 {{ $socio->nome }}
@@ -333,6 +339,7 @@
                         <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
+                
                 <div class="card-footer text-right">
                     <button type="submit" class="btn btn-sm btn-danger">
                         <i class="fas fa-hand-holding-usd mr-1"></i> Registrar Despesa
@@ -343,6 +350,8 @@
     </div>
 
 </div>
+
+---
 
 {{-- TERCEIRA LINHA: EXTRATO DE LANÇAMENTOS (UNIFICADO) --}}
 <div class="row">
