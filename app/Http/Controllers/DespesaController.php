@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Despesa;
 use App\Models\Cultura;
+use App\Models\Socio; // <--- NOVO: Importação do Model Socio
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // <--- Importação necessária
+use Illuminate\Support\Facades\DB; 
 
 class DespesaController extends Controller
 {
@@ -14,9 +15,8 @@ class DespesaController extends Controller
      */
     public function index()
     {
-        // Obtém todas as despesas e pagina.
-        // O método with('cultura') otimiza o carregamento do nome da cultura.
-        $despesas = Despesa::with('cultura')->orderBy('data', 'desc')->paginate(10);
+        // Otimização: Carrega 'cultura' e o novo relacionamento 'pagoPorSocio'
+        $despesas = Despesa::with(['cultura', 'pagoPorSocio'])->orderBy('data', 'desc')->paginate(10);
         
         return view('despesas.index', compact('despesas'));
     }
@@ -26,15 +26,17 @@ class DespesaController extends Controller
      */
     public function create()
     {
-        // Lista de culturas para o campo de seleção (pode ser opcional)
         $culturas = Cultura::orderBy('nome')->get(['id', 'nome']);
         
-        // Categorias predefinidas para facilitar o controle
+        // <--- NOVO: Carrega a lista de sócios
+        $socios = Socio::orderBy('nome')->get(['id', 'nome']);
+        
         $categorias = [
             'Insumo', 'Semente', 'Mão-de-Obra', 'Combustível', 'Eletricidade', 'Equipamento', 'Manutenção', 'Outro Geral'
         ];
 
-        return view('despesas.create', compact('culturas', 'categorias'));
+        // <--- NOVO: Variável $socios adicionada ao compact
+        return view('despesas.create', compact('culturas', 'categorias', 'socios'));
     }
 
     /**
@@ -48,13 +50,15 @@ class DespesaController extends Controller
             'data' => 'required|date',
             'categoria' => 'required|string|max:100',
             'cultura_id' => 'nullable|exists:culturas,id',
+            // <--- NOVO: Campo obrigatório e checa se existe na tabela 'socios'
+            'pago_por_socio_id' => 'required|exists:socios,id', 
             'observacoes' => 'nullable|string',
         ], [
             'required' => 'O campo :attribute é obrigatório.',
             'numeric' => 'O campo :attribute deve ser um número.',
             'min' => 'O campo :attribute deve ser no mínimo :min.',
             'date' => 'O campo :attribute deve ser uma data válida.',
-            'exists' => 'A Cultura selecionada é inválida.',
+            'exists' => 'A Cultura/Sócio selecionado(a) é inválida.',
         ]);
 
         Despesa::create($request->all());
@@ -68,13 +72,10 @@ class DespesaController extends Controller
      */
     public function storeMultiCultura(Request $request)
     {
-        // 🚨 PONTO DE DEBUG 1: VERIFICA SE A REQUISIÇÃO CHEGA E PASSA NA VALIDAÇÃO
-        // Se esta linha for executada, a requisição chegou ao Controller e os dados são válidos.
-        // Se a página carregar normalmente, o erro está na rota ou em alguma camada antes.
-        // dd($request->all()); 
-        
         $request->validate([
             'cultura_id' => 'required|exists:culturas,id',
+            // <--- NOVO: Agora a Requisição deve trazer o ID do sócio pagador para o lote
+            'pago_por_socio_id' => 'required|exists:socios,id', 
             'data_base' => 'required|date',
             'itens' => 'required|array|min:1',
             'itens.*.categoria' => 'required|string|max:100',
@@ -84,12 +85,14 @@ class DespesaController extends Controller
 
         $culturaId = $request->cultura_id;
         $dataBase = $request->data_base;
+        $pagoPorSocioId = $request->pago_por_socio_id; // <--- NOVO: Captura o ID do pagador
         $dadosParaInserir = [];
         $agora = now();
 
         foreach ($request->itens as $item) {
             $dadosParaInserir[] = [
                 'cultura_id' => $culturaId,
+                'pago_por_socio_id' => $pagoPorSocioId, // <--- NOVO: Adiciona a cada item
                 'data' => $dataBase,
                 'categoria' => $item['categoria'],
                 'descricao' => $item['descricao'],
@@ -99,10 +102,6 @@ class DespesaController extends Controller
             ];
         }
         
-        // 🚨 PONTO DE DEBUG 2: VERIFICA OS DADOS PRONTOS PARA INSERÇÃO
-        // Se esta linha for executada, os dados estão estruturados corretamente.
-        // dd($dadosParaInserir); 
-
         try {
             DB::beginTransaction();
             
@@ -116,15 +115,12 @@ class DespesaController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            // 🚨 PONTO DE DEBUG 3: EXIBE QUALQUER ERRO DE BANCO DE DADOS
-            // Se o erro cair aqui, haverá uma mensagem clara sobre o que falhou no DB.
-            // dd($e->getMessage()); 
-            
             return redirect()->back()
                              ->withInput()
                              ->with('error', 'Não foi possível salvar as despesas: ' . $e->getMessage());
         }
     }
+    
     /**
      * Exibe uma despesa específica (Opcional).
      */
@@ -139,11 +135,14 @@ class DespesaController extends Controller
     public function edit(Despesa $despesa)
     {
         $culturas = Cultura::orderBy('nome')->get(['id', 'nome']);
+        // <--- NOVO: Carrega a lista de sócios
+        $socios = Socio::orderBy('nome')->get(['id', 'nome']);
         $categorias = [
             'Insumo', 'Semente', 'Mão-de-Obra', 'Combustível', 'Eletricidade', 'Equipamento', 'Manutenção', 'Outro Geral'
         ];
         
-        return view('despesas.edit', compact('despesa', 'culturas', 'categorias'));
+        // <--- NOVO: Variável $socios adicionada ao compact
+        return view('despesas.edit', compact('despesa', 'culturas', 'categorias', 'socios'));
     }
 
     /**
@@ -157,7 +156,8 @@ class DespesaController extends Controller
             'data' => 'required|date',
             'categoria' => 'required|string|max:100',
             'cultura_id' => 'nullable|exists:culturas,id',
-            'observacoes' => 'nullable|string',
+            // <--- NOVO: Validação para o campo de edição
+            'pago_por_socio_id' => 'required|exists:socios,id', 
         ]);
 
         $despesa->update($request->all());

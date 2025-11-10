@@ -87,6 +87,17 @@
                             <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                         @enderror
                     </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="pago_por_socio_id">Pago por:</label>
+                         {{-- $socios deve ser carregado no Controller --}}
+                            <select class="form-control" name="pago_por_socio_id" id="pago_por_socio_id" required>
+                                 <option value="">-- Selecione o Sócio --</option>
+                                     @foreach ($socios as $socio)
+                                         <option value="{{ $socio->id }}">{{ $socio->nome }}</option>
+                                     @endforeach
+                            </select>
+                     </div>
                     
                     {{-- Observações (Linha Inteira) --}}
                     <div class="form-group">

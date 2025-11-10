@@ -248,7 +248,16 @@
                         <input type="text" class="form-control form-control-sm @error('descricao') is-invalid @enderror" id="descricao_despesa" name="descricao" value="{{ old('descricao') }}" required>
                     </div>
                 </div>
-                
+                <div class="form-group col-md-6">
+                   <label for="pago_por_socio_id">Pago por:</label>
+                   {{-- $socios deve ser carregado no Controller --}}
+                       <select class="form-control" name="pago_por_socio_id" id="pago_por_socio_id" required>
+                          <option value="">-- Selecione o Sócio --</option>
+                            @foreach ($socios as $socio)
+                                <option value="{{ $socio->id }}">{{ $socio->nome }}</option>
+                            @endforeach
+                     </select>
+                </div>
                 <div class="card-footer text-right">
                     <button type="submit" class="btn btn-sm btn-danger">
                         <i class="fas fa-hand-holding-usd mr-1"></i> Registrar Despesa

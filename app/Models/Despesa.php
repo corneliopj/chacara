@@ -17,6 +17,7 @@ class Despesa extends Model
         'valor',
         'data',
         'categoria', // Adicionado para classificar (Semente, Insumo, Mão-de-Obra, Geral, etc.)
+        'pago_por_socio_id',
         'observacoes',
     ];
 
