@@ -125,8 +125,8 @@
     {{-- COLUNA DIREITA (6): Resumo Financeiro e Cota de Contribuição --}}
     <div class="col-md-6">
         
-        {{-- NOVO CARD 1 NA DIREITA: Resumo Financeiro da Cultura --}}
-        <div class="card card-warning card-outline"> {{-- h-100 REMOVIDO --}}
+        {{-- CARD 1 NA DIREITA: Resumo Financeiro da Cultura --}}
+        <div class="card card-warning card-outline"> 
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Resumo Financeiro da Cultura</h3>
             </div>
@@ -148,7 +148,7 @@
             </div>
         </div>
         
-        {{-- NOVO CARD 2 NA DIREITA: Cota de Contribuição dos Sócios (MOVIDO) --}}
+        {{-- CARD 2 NA DIREITA: Cota de Contribuição dos Sócios (AGORA COMPACTO) --}}
         <div class="card card-warning card-outline">
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-percent mr-1"></i> Cota de Contribuição dos Sócios</h3>
@@ -159,21 +159,22 @@
                 @method('PUT')
                 
                 <div class="card-body">
-                    <p class="text-muted">Defina a porcentagem de custeio/receita para cada sócio nesta cultura. **O total deve somar 100%.**</p>
+                    {{-- OTIMIZADO: Texto de ajuda mais compacto --}}
+                    <small class="text-muted d-block mb-3">Defina a porcentagem de custeio/receita para cada sócio. **O total deve somar 100%.**</small>
                     
                     @if ($errors->has('cotas_total') || $errors->has('cotas_percentual.*'))
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger p-2 mb-3">
                             Verifique os erros: O total das cotas deve somar 100% ou há valores inválidos.
                         </div>
                     @endif
                     
-                    {{-- O bloco @php foi movido para o topo do arquivo para simplificação --}}
-
                     @foreach ($socios as $socio)
-                        <div class="form-group row border-bottom py-2">
-                            <label for="cotas_{{ $socio->id }}" class="col-sm-6 col-form-label">{{ $socio->nome }}:</label>
-                            <div class="col-sm-6">
-                                <div class="input-group">
+                        {{-- OTIMIZADO: Removido border-bottom e py-2, ajustado colunas e espaçamento vertical --}}
+                        <div class="form-group row mb-2"> 
+                            <label for="cotas_{{ $socio->id }}" class="col-sm-5 col-form-label pt-0 pb-0">{{ $socio->nome }}:</label>
+                            <div class="col-sm-7">
+                                {{-- OTIMIZADO: Adicionado input-group-sm para inputs menores --}}
+                                <div class="input-group input-group-sm"> 
                                     <input type="number" step="0.01" min="0" max="100"
                                         name="cotas[{{ $socio->id }}][percentual_cota]" 
                                         id="cotas_{{ $socio->id }}" 
@@ -191,12 +192,13 @@
                         </div>
                     @endforeach
                     
-                    <div class="row mt-3">
+                    {{-- OTIMIZADO: Redução de margem superior --}}
+                    <div class="row mt-2"> 
                         <div class="col-6">
-                            <p class="text-right font-weight-bold">Total Atual:</p>
+                            <p class="text-right font-weight-bold mb-0">Total Atual:</p>
                         </div>
                         <div class="col-6">
-                            <p class="text-right font-weight-bold text-{{ $total_atual == 100 ? 'success' : 'danger' }}" 
+                            <p class="text-right font-weight-bold text-{{ $total_atual == 100 ? 'success' : 'danger' }} mb-0" 
                                 id="total-cota">
                                 {{ number_format($total_atual, 2, ',', '.') }}%
                             </p>
@@ -205,7 +207,8 @@
                 </div>
                 
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-warning float-right">
+                    {{-- OTIMIZADO: Botão menor (btn-sm) --}}
+                    <button type="submit" class="btn btn-warning btn-sm float-right">
                         <i class="fas fa-sync-alt mr-1"></i> Atualizar Cotas
                     </button>
                 </div>
@@ -217,7 +220,7 @@
 
 ---
 
-{{-- SEGUNDA LINHA: FORMULÁRIOS DE LANÇAMENTO (SEM ALTERAÇÃO DE LAYOUT) --}}
+{{-- SEGUNDA LINHA: FORMULÁRIOS DE LANÇAMENTO --}}
 <div class="row">
     
     {{-- COLUNA ESQUERDA (6): Lançar Nova Receita de Venda --}}
@@ -321,7 +324,7 @@
                     </div>
                 </div>
                 
-                {{-- Campo Sócio Pagador (MANTIDO aqui, pois é parte do formulário de Despesa) --}}
+                {{-- Campo Sócio Pagador --}}
                 <div class="form-group col-md-12">
                     <label for="pago_por_socio_id">Sócio Pagador:</label>
                     <select class="form-control @error('pago_por_socio_id') is-invalid @enderror" 
