@@ -48,7 +48,7 @@
     // Combina e Ordena pela data (mais recente primeiro)
     $extrato = $despesas_formatadas->merge($receitas_formatadas)->sortByDesc('data');
 
-    // Assumimos que $unidades e $categorias estão disponíveis
+    // Variáveis passadas do Controller
     $unidades = $unidades ?? ['Kg', 'Unidade', 'Saco', 'Litro', 'Caixa'];
     $categorias = $categorias ?? ['Insumo', 'Semente', 'Mão-de-Obra', 'Combustível', 'Eletricidade', 'Equipamento', 'Manutenção', 'Outro Geral'];
 
@@ -72,35 +72,41 @@
                     {{-- Campos de Edição da Cultura --}}
                     <div class="form-group">
                         <label for="nome">Nome da Cultura:</label>
-                        <input type="text" name="nome" id="nome" class="form-control form-control-sm @error('nome') is-invalid @enderror" value="{{ old('nome', $cultura->nome) }}" required>
+                        {{-- ALTERADO: Removido form-control-sm --}}
+                        <input type="text" name="nome" id="nome" class="form-control @error('nome') is-invalid @enderror" value="{{ old('nome', $cultura->nome) }}" required>
                         @error('nome')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
                     </div>
                     
-                    <div class="form-group">
-                        <label for="area_m2">Área (m²):</label>
-                        <input type="number" step="0.01" name="area_m2" id="area_m2" class="form-control form-control-sm @error('area_m2') is-invalid @enderror" value="{{ old('area_m2', $cultura->area_m2) }}" required>
-                        @error('area_m2')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="status">Status:</label>
-                        <select name="status" id="status" class="form-control form-control-sm @error('status') is-invalid @enderror" required>
-                            @foreach (['Em Planejamento', 'Ativa', 'Em Colheita', 'Finalizada', 'Cancelada'] as $status)
-                                <option value="{{ $status }}" {{ old('status', $cultura->status) == $status ? 'selected' : '' }}>{{ $status }}</option>
-                            @endforeach
-                        </select>
-                        @error('status')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label for="area_m2">Área (m²):</label>
+                            {{-- ALTERADO: Removido form-control-sm --}}
+                            <input type="number" step="0.01" name="area_m2" id="area_m2" class="form-control @error('area_m2') is-invalid @enderror" value="{{ old('area_m2', $cultura->area_m2) }}" required>
+                            @error('area_m2')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        
+                        <div class="form-group col-md-6">
+                            <label for="status">Status:</label>
+                            {{-- ALTERADO: Removido form-control-sm --}}
+                            <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
+                                @foreach (['Em Planejamento', 'Ativa', 'Em Colheita', 'Finalizada', 'Cancelada'] as $status)
+                                    <option value="{{ $status }}" {{ old('status', $cultura->status) == $status ? 'selected' : '' }}>{{ $status }}</option>
+                                @endforeach
+                            </select>
+                            @error('status')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="observacoes">Observações (Opcional):</label>
-                        <textarea name="observacoes" id="observacoes" class="form-control form-control-sm @error('observacoes') is-invalid @enderror" rows="2">{{ old('observacoes', $cultura->observacoes) }}</textarea>
+                        {{-- ALTERADO: Removido form-control-sm --}}
+                        <textarea name="observacoes" id="observacoes" class="form-control @error('observacoes') is-invalid @enderror" rows="2">{{ old('observacoes', $cultura->observacoes) }}</textarea>
                         @error('observacoes')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
@@ -115,22 +121,22 @@
     
     {{-- COLUNA DIREITA (6): Resumo Financeiro --}}
     <div class="col-md-6">
-        <div class="card card-warning card-outline">
+        <div class="card card-warning card-outline h-100"> {{-- h-100 para esticar e alinhar --}}
             <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Resumo Financeiro da Cultura</h3>
             </div>
-            <div class="card-body">
-                <div class="row">
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <div class="row w-100">
                     <div class="col-4 text-center">
-                        <h5 class="text-success">Receita Total</h5>
+                        <h5 class="text-success mb-1">Receita Total</h5>
                         <p class="h4">R$ {{ number_format($receita_total, 2, ',', '.') }}</p>
                     </div>
                     <div class="col-4 text-center">
-                        <h5 class="text-danger">Custeio Total</h5>
+                        <h5 class="text-danger mb-1">Custeio Total</h5>
                         <p class="h4">R$ {{ number_format($custeio_total, 2, ',', '.') }}</p>
                     </div>
                     <div class="col-4 text-center">
-                        <h5 class="{{ $resultado_liquido >= 0 ? 'text-primary' : 'text-danger' }}">Resultado Líquido</h5>
+                        <h5 class="{{ $resultado_liquido >= 0 ? 'text-primary' : 'text-danger' }} mb-1">Resultado Líquido</h5>
                         <p class="h4">R$ {{ number_format($resultado_liquido, 2, ',', '.') }}</p>
                     </div>
                 </div>
@@ -200,7 +206,7 @@
         </div>
     </div>
     
-    {{-- COLUNA DIREITA (6): Lançar Nova Despesa (Reintroduzido) --}}
+    {{-- COLUNA DIREITA (6): Lançar Nova Despesa --}}
     <div class="col-md-6">
         <div class="card card-danger card-outline">
             <div class="card-header">
@@ -209,7 +215,6 @@
             
             <form action="{{ route('despesas.store') }}" method="POST">
                 @csrf
-                {{-- Campo oculto para vincular automaticamente a Despesa à Cultura atual --}}
                 <input type="hidden" name="cultura_id" value="{{ $cultura->id }}"> 
                 
                 <div class="card-body">
@@ -239,7 +244,7 @@
 
                     {{-- Descrição --}}
                     <div class="form-group">
-                        <label for="descricao_despesa">Descrição do Gasto (Insumo, Serviço, etc.)</label>
+                        <label for="descricao_despesa">Descrição do Gasto</label>
                         <input type="text" class="form-control form-control-sm @error('descricao') is-invalid @enderror" id="descricao_despesa" name="descricao" value="{{ old('descricao') }}" required>
                     </div>
                 </div>
