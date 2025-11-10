@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cultura;
 use App\Models\Despesa; // Usado no método edit
+use App\Models\Socio; 
 use Illuminate\Http\Request;
 
 class CulturaController extends Controller
@@ -72,8 +73,11 @@ class CulturaController extends Controller
         'Equipamento', 'Manutenção', 'Outro Geral'
     ]; 
 
+    $socios = Socio::orderBy('nome')->get(['id', 'nome']); 
+
     // 3. Passando todas as variáveis necessárias para a view
-    return view('culturas.edit', compact('cultura', 'unidades', 'categorias')); 
+    // <--- NOVO: Variável $socios adicionada aqui
+    return view('culturas.edit', compact('cultura', 'unidades', 'categorias', 'socios'));
 }
 
     /**
