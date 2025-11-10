@@ -117,6 +117,73 @@
                 </form>
             </div>
         </div>
+        <div class="card card-warning card-outline">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-percent mr-1"></i> Cota de Contribuição dos Sócios</h3>
+            </div>
+            
+            {{-- Importante: A rota cultura.update.socios deve ser criada --}}
+            <form action="{{ route('culturas.update.socios', $cultura->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                
+                <div class="card-body">
+                    <p class="text-muted">Defina a porcentagem de custeio/receita para cada sócio nesta cultura. **O total deve somar 100%.**</p>
+                    
+                    @if ($errors->has('cotas_total') || $errors->has('cotas_percentual.*'))
+                        <div class="alert alert-danger">
+                            Verifique os erros: O total das cotas deve somar 100% ou há valores inválidos.
+                        </div>
+                    @endif
+                    
+                    @php 
+                        // Mapeia os sócios existentes na cultura (com percentual) para facilitar o acesso
+                        $cotas_atuais = $cultura->socios->pluck('pivot.percentual_cota', 'id')->toArray();
+                        $total_atual = array_sum($cotas_atuais);
+                    @endphp
+
+                    @foreach ($socios as $socio)
+                        <div class="form-group row border-bottom py-2">
+                            <label for="cotas_{{ $socio->id }}" class="col-sm-6 col-form-label">{{ $socio->nome }}:</label>
+                            <div class="col-sm-6">
+                                <div class="input-group">
+                                    <input type="number" step="0.01" min="0" max="100"
+                                        name="cotas[{{ $socio->id }}][percentual_cota]" 
+                                        id="cotas_{{ $socio->id }}" 
+                                        class="form-control text-right @error('cotas.' . $socio->id . '.percentual_cota') is-invalid @enderror" 
+                                        value="{{ old('cotas.' . $socio->id . '.percentual_cota', $cotas_atuais[$socio->id] ?? 0) }}" 
+                                        required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    @error('cotas.' . $socio->id . '.percentual_cota')
+                                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                    
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <p class="text-right font-weight-bold">Total Atual:</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-right font-weight-bold text-{{ $total_atual == 100 ? 'success' : 'danger' }}" 
+                                id="total-cota">
+                                {{ number_format($total_atual, 2, ',', '.') }}%
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-warning float-right">
+                        <i class="fas fa-sync-alt mr-1"></i> Atualizar Cotas
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
     
     {{-- COLUNA DIREITA (6): Resumo Financeiro --}}

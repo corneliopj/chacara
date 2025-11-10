@@ -47,4 +47,10 @@ class Cultura extends Model
     {
         return $this->hasMany(Receita::class);
     }
+    public function socios()
+    {
+        // Usa withPivot('percentual_cota') para acessar o campo extra na tabela pivot.
+        return $this->belongsToMany(Socio::class, 'cultura_socio', 'cultura_id', 'socio_id')
+                    ->withPivot('percentual_cota');
+    }
 }

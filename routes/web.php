@@ -28,6 +28,8 @@ Route::resource('culturas', CulturaController::class)->names([
     'update' => 'culturas.update',
     'destroy' => 'culturas.destroy',
 ]);
+Route::put('/culturas/{cultura}/cotas', [CulturaController::class, 'updateSociosQuota'])
+    ->name('culturas.update.socios');
 
 // --- CRUD DE DESPESAS ---
 Route::resource('despesas', DespesaController::class)->names([

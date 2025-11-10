@@ -112,6 +112,48 @@ class CulturaController extends Controller
             ->with('error', 'Erro ao atualizar a Cultura: ' . $e->getMessage());
     }
 }
+public function updateSociosQuota(Request $request, Cultura $cultura)
+    {
+        $cotas = $request->input('cotas');
+        
+        // 1. Validação básica de que todos os valores são numéricos e entre 0 e 100
+        $validationRules = [];
+        $validationMessages = [];
+        foreach ($cotas as $socioId => $data) {
+            $validationRules["cotas.$socioId.percentual_cota"] = 'required|numeric|min:0|max:100';
+            $validationMessages["cotas.$socioId.percentual_cota.required"] = "O percentual do sócio $socioId é obrigatório.";
+        }
 
+        $request->validate($validationRules, $validationMessages);
+        
+        // 2. Validação se o total das cotas soma 100%
+        $totalCotas = array_sum(array_column($cotas, 'percentual_cota'));
+
+        if (abs($totalCotas - 100) > 0.01) { // Usamos uma pequena margem de erro (0.01) para float
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['cotas_total' => 'A soma total dos percentuais deve ser exatamente 100% (Total atual: ' . number_format($totalCotas, 2, ',', '.') . '%).'])
+                ->with('error', 'Erro de validação: A soma das cotas deve ser 100%.');
+        }
+        
+        // 3. Preparar os dados para o sync
+        $syncData = [];
+        foreach ($cotas as $socioId => $data) {
+            $syncData[$socioId] = ['percentual_cota' => $data['percentual_cota']];
+        }
+
+        try {
+            // 4. Salva (cria/atualiza/deleta) os registros na tabela pivot (cultura_socio)
+            $cultura->socios()->sync($syncData);
+
+            return redirect()->route('culturas.edit', $cultura->id)
+                ->with('success', 'Cotas de contribuição atualizadas com sucesso! (' . number_format($totalCotas, 2, ',', '.') . '%)');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Erro ao salvar as cotas: ' . $e->getMessage());
+        }
+    }
     // ... (Método destroy omitido)
 }
