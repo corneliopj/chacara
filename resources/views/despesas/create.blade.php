@@ -90,14 +90,22 @@
 
                     <div class="form-group col-md-6">
                         <label for="pago_por_socio_id">Pago por:</label>
-                         {{-- $socios deve ser carregado no Controller --}}
-                            <select class="form-control" name="pago_por_socio_id" id="pago_por_socio_id" required>
-                                 <option value="">-- Selecione o Sócio --</option>
-                                     @foreach ($socios as $socio)
-                                         <option value="{{ $socio->id }}">{{ $socio->nome }}</option>
-                                     @endforeach
-                            </select>
-                     </div>
+                        <select class="form-control @error('pago_por_socio_id') is-invalid @enderror" 
+                                name="pago_por_socio_id" 
+                                id="pago_por_socio_id" 
+                                required>
+                            <option value="">-- Selecione o Sócio --</option>
+                            {{-- $socios é carregado no DespesaController@create --}}
+                            @foreach ($socios as $socio)
+                                <option value="{{ $socio->id }}" {{ old('pago_por_socio_id') == $socio->id ? 'selected' : '' }}>
+                                    {{ $socio->nome }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('pago_por_socio_id')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
+                    </div>
                     
                     {{-- Observações (Linha Inteira) --}}
                     <div class="form-group">

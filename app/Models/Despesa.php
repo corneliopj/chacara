@@ -29,4 +29,9 @@ class Despesa extends Model
     {
         return $this->belongsTo(Cultura::class);
     }
+
+    public function pagoPorSocio()
+    {
+        return $this->belongsTo(Socio::class, 'pago_por_socio_id');
+    }
 }

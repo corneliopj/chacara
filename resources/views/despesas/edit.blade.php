@@ -89,6 +89,24 @@
                         @enderror
                     </div>
 
+                    <div class="form-group">
+                        <label for="pago_por_socio_id">Pago por:</label>
+                        {{-- $socios é carregado no DespesaController@edit --}}
+                        <select class="form-control" 
+                                name="pago_por_socio_id" 
+                                id="pago_por_socio_id" 
+                                required>
+                            <option value="">-- Selecione o Sócio --</option>
+                            @foreach ($socios as $socio)
+                                <option value="{{ $socio->id }}" 
+                                    {{ old('pago_por_socio_id', $despesa->pago_por_socio_id) == $socio->id ? 'selected' : '' }}>
+                                    {{ $socio->nome }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('pago_por_socio_id') <span class="error-message">{{ $message }}</span> @enderror
+                    </div>
+
                     {{-- 6. Observações (Linha Inteira) --}}
                     <div class="form-group">
                         <label for="observacoes">Observações (Opcional):</label>

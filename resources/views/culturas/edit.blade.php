@@ -248,15 +248,23 @@
                         <input type="text" class="form-control form-control-sm @error('descricao') is-invalid @enderror" id="descricao_despesa" name="descricao" value="{{ old('descricao') }}" required>
                     </div>
                 </div>
-                <div class="form-group col-md-6">
-                   <label for="pago_por_socio_id">Pago por:</label>
-                   {{-- $socios deve ser carregado no Controller --}}
-                       <select class="form-control" name="pago_por_socio_id" id="pago_por_socio_id" required>
-                          <option value="">-- Selecione o Sócio --</option>
-                            @foreach ($socios as $socio)
-                                <option value="{{ $socio->id }}">{{ $socio->nome }}</option>
-                            @endforeach
-                     </select>
+                <div class="form-group col-md-12">
+                    <label for="pago_por_socio_id">Sócio Pagador (para este Lote de Despesas):</label>
+                    <select class="form-control @error('pago_por_socio_id') is-invalid @enderror" 
+                            name="pago_por_socio_id" 
+                            id="pago_por_socio_id" 
+                            required>
+                        <option value="">-- Selecione o Sócio Pagador --</option>
+                        {{-- $socios é carregado no CulturaController@edit --}}
+                        @foreach ($socios as $socio)
+                            <option value="{{ $socio->id }}" {{ old('pago_por_socio_id') == $socio->id ? 'selected' : '' }}>
+                                {{ $socio->nome }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('pago_por_socio_id')
+                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
                 </div>
                 <div class="card-footer text-right">
                     <button type="submit" class="btn btn-sm btn-danger">
