@@ -6,6 +6,7 @@ use App\Models\Cultura;
 use App\Models\Inventario; 
 use App\Models\Receita; 
 use App\Models\Despesa; 
+use App\Models\Socio; // NOVO: Importar o modelo Socio
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB; 
 
@@ -39,6 +40,22 @@ class DashboardController extends Controller
             ->with('cultura')
             ->limit(5)
             ->get();
+            
+        // 4. Despesas Pagas por Sócio (NOVO)
+        $despesasPorSocio = Despesa::select('pago_por_socio_id', DB::raw('SUM(valor) as total_pago'))
+            ->whereNotNull('pago_por_socio_id') // Apenas despesas com sócio pagador definido
+            ->groupBy('pago_por_socio_id')
+            // Carrega o nome do sócio (assumindo relacionamento pagoPorSocio no modelo Despesa)
+            ->with('pagoPorSocio:id,nome') 
+            ->get();
+        
+        // Formatar os dados para fácil exibição na View
+        $resumoDespesasSocio = $despesasPorSocio->map(function ($item) {
+            return [
+                'nome' => $item->pagoPorSocio->nome ?? 'Sócio Não Identificado',
+                'total_pago' => $item->total_pago,
+            ];
+        });
 
         // CORREÇÃO: Mudar 'dashboard.index' para 'dashboard'
         return view('dashboard', [
@@ -47,6 +64,7 @@ class DashboardController extends Controller
             'total_despesas' => $total_despesas,
             'balanco_geral' => $balanco_geral,
             'culturas_mais_caras' => $culturas_mais_caras,
+            'resumoDespesasSocio' => $resumoDespesasSocio, // NOVO
         ]);
     }
 }
