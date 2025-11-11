@@ -162,7 +162,7 @@
                         @foreach($culturas_mais_caras as $cultura_despesa)
                         <li class="item">
                             <div class="product-info">
-                                {{ $cultura_despesa->cultura->nome ?? 'Cultura Não Encontrada' }}
+                                {{ $cultura_despesa->cultura->nome ?? 'Despesas Gerais' }}
                                 <span class="product-description float-right text-danger">
                                     R$ {{ number_format($cultura_despesa->total_despesa, 2, ',', '.') }}
                                 </span>
